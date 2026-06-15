@@ -1,0 +1,22 @@
+{
+  "name": "vite-plugin-flatwave-react-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build:plugin": "npm run build -w vite-plugin-flatwave-react",
+    "build:example": "npm run build -w @flatwave/example-basic-react-site",
+    "build": "npm run build:plugin && npm run build:example",
+    "validate:example": "node packages/vite-plugin-flatwave-react/dist/cli/validate.js --content-dir examples/basic-react-site/src/content --locales es,pt --default-locale es --components-dir examples/basic-react-site/src/components",
+    "test:e2e": "vitest run e2e/example.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

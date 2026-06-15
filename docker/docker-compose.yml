@@ -1,0 +1,30 @@
+services:
+  dev:
+    build:
+      context: ..
+      dockerfile: docker/dev.Dockerfile
+    working_dir: /app
+    command: npm run dev -w @flatwave/example-basic-react-site
+    ports:
+      - "8080:8080"
+    volumes:
+      - ..:/app
+      - /app/node_modules
+  build:
+    build:
+      context: ..
+      dockerfile: docker/build.Dockerfile
+    working_dir: /app
+    command: npm run build
+    volumes:
+      - ..:/app
+      - /app/node_modules
+  static:
+    image: nginx:1.27-alpine
+    depends_on:
+      - build
+    ports:
+      - "4173:80"
+    volumes:
+      - ../examples/basic-react-site/dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
