@@ -410,7 +410,10 @@ export default defineConfig({
 
 2. **Frontmatter parsing**
    - The plugin MUST parse YAML frontmatter.
-   - It MUST expose `attributes`, `body`, and normalized metadata.
+   - The plugin MUST expose `attributes`, `body`, and normalized metadata.
+   - The plugin MUST require only baseline frontmatter fields such as `title`, `slug`, `id`, `component`, and `public`.
+   - Additional frontmatter fields MUST be preserved in `attributes` and passed through to components because each component or content type may require different metadata.
+   - The plugin MUST NOT reject unknown frontmatter fields by default.
 
 3. **Localized content indexing**
    - The plugin MUST group content by `id` and `locale`.
@@ -484,7 +487,19 @@ export default defineConfig({
 
 ---
 
-## 6. Proposed Architecture
+## 6. Design Principles
+
+The design and implementation must follow these mandatory engineering principles:
+
+- **DRY**: shared scanning, parsing, validation, route building, SEO, sitemap, and virtual-module logic must live in reusable modules instead of being duplicated across the plugin, CLI, tests, and example app.
+- **SOLID**: each module should have a single responsibility, public APIs should depend on stable abstractions, plugin behavior should be configurable without editing internals, and adapters should be replaceable without changing the content model.
+- **Content-type flexibility**: only baseline frontmatter fields are required globally. Additional frontmatter fields may vary by component, content type, or business need and must be preserved in `attributes` without rejection.
+- **Single source of truth**: generated content indexes, route inventories, and virtual modules must be derived from the same parsed Markdown data.
+- **Static SEO correctness**: locale URLs must remain static and locale-specific; browser language detection must not change content for the same URL.
+
+---
+
+## 7. Proposed Architecture
 
 ### 6.1 Package Modules
 
@@ -649,7 +664,7 @@ Generated tags should include:
 
 ---
 
-## 7. Proposed Example App
+## 8. Proposed Example App
 
 A new simple example app should be added for plugin development:
 
@@ -746,7 +761,7 @@ Docker acceptance checks:
 
 ---
 
-## 8. Validation and Testing Strategy
+## 9. Validation and Testing Strategy
 
 ### 8.1 Unit Tests
 
@@ -793,7 +808,7 @@ The plugin planning is complete when:
 
 ---
 
-## 9. Risks and Trade-Offs
+## 10. Risks and Trade-Offs
 
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
@@ -807,7 +822,7 @@ The plugin planning is complete when:
 
 ---
 
-## 10. Resolved Decisions
+## 11. Resolved Decisions
 
 1. The v1 package is React-specific.
 2. The default SSG adapter is Vike, with the route inventory kept adapter-neutral for future adapters.
@@ -819,7 +834,7 @@ The plugin planning is complete when:
 
 ---
 
-## 11. Recommended Roadmap
+## 12. Recommended Roadmap
 
 ### Phase 0: Docker Infrastructure and Example Static Site
 
@@ -883,7 +898,7 @@ The plugin planning is complete when:
 
 ---
 
-## 12. Conclusion
+## 13. Conclusion
 
 The current Radionudista project already demonstrates the core workflow: Markdown content, frontmatter-driven metadata, localized routes, browser language detection, and Vite plugin-based indexing. The reusable plugin should preserve those strengths while removing project-specific assumptions, consolidating validation, exposing typed virtual modules, integrating with SSG, and generating SEO metadata.
 

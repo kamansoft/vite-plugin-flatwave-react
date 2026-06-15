@@ -1,0 +1,57 @@
+{
+  "name": "vite-plugin-flatwave-react",
+  "version": "0.1.0",
+  "description": "Vite content plugin for Markdown-driven, i18n-aware static React sites.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    },
+    "./seo": {
+      "types": "./dist/seo/metadata.d.ts",
+      "import": "./dist/seo/metadata.js"
+    },
+    "./validation": {
+      "types": "./dist/content/validator.d.ts",
+      "import": "./dist/content/validator.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "flatwave-validate": "./dist/cli/validate.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "vite": "^5.0.0 || ^6.0.0 || ^7.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "dependencies": {
+    "commander": "^13.1.0",
+    "fast-glob": "^3.3.3",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7"
+  }
+}
