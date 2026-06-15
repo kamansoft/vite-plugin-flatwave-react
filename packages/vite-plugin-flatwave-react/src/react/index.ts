@@ -1,3 +1,5 @@
+/// <reference path="../virtual.d.ts" />
+
 import { useMemo } from 'react';
 import {
   getAllContent,

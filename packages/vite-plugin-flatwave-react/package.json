@@ -22,6 +22,9 @@
       "types": "./dist/content/validator.d.ts",
       "import": "./dist/content/validator.js"
     },
+    "./types": {
+      "types": "./dist/types.d.ts"
+    },
     "./package.json": "./package.json"
   },
   "bin": {
@@ -29,11 +32,40 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && node scripts/copy-virtual-types.js",
     "test": "vitest run"
+  },
+  "author": "KamanaSoft",
+  "license": "MIT",
+  "keywords": [
+    "vite",
+    "vite-plugin",
+    "react",
+    "markdown",
+    "i18n",
+    "ssg",
+    "static-site-generator",
+    "content"
+  ],
+  "homepage": "https://github.com/kamansoft/vite-plugin-flatwave-react/tree/main/packages/vite-plugin-flatwave-react",
+  "bugs": {
+    "url": "https://github.com/kamansoft/vite-plugin-flatwave-react/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamansoft/vite-plugin-flatwave-react.git",
+    "directory": "packages/vite-plugin-flatwave-react"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "peerDependencies": {
     "vite": "^5.0.0 || ^6.0.0 || ^7.0.0",
