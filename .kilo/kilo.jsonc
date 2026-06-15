@@ -1,0 +1,6 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "commit_message": {
+    "prompt": "generate commit messages always using conventional commits,  type(subject): description"
+  }
+}
