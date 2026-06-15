@@ -70,13 +70,14 @@
     "access": "public"
   },
   "peerDependencies": {
-    "vite": "^5.0.0 || ^6.0.0 || ^7.0.0",
     "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
+    "react-dom": ">=18.0.0",
+    "vite": "^5.0.0 || ^6.0.0 || ^7.0.0"
   },
   "dependencies": {
     "commander": "^13.1.0",
     "fast-glob": "^3.3.3",
+    "gravatar": "^1.8.2",
     "gray-matter": "^4.0.3"
   },
   "devDependencies": {
