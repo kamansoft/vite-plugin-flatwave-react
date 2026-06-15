@@ -7,39 +7,39 @@ const root = process.cwd();
 const pluginWorkspace = 'vite-plugin-flatwave-react';
 const exampleWorkspace = '@flatwave/example-basic-react-site';
 const exampleDist = path.resolve(root, 'examples/basic-react-site/dist');
-let preview: ChildProcessWithoutNullStreams | undefined;
+let serve: ChildProcessWithoutNullStreams | undefined;
 
-async function waitForPreview(): Promise<void> {
+async function waitForServe(): Promise<void> {
   const deadline = Date.now() + 20_000;
   let lastError: unknown;
 
   while (Date.now() < deadline) {
     try {
-      const response = await fetch('http://127.0.0.1:4173/es/about');
+      const response = await fetch('http://127.0.0.1:4173/es/program');
       if (response.ok) return;
-      lastError = new Error(`preview returned ${response.status}`);
+      lastError = new Error(`serve returned ${response.status}`);
     } catch (error) {
       lastError = error;
     }
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
-  throw new Error(`Preview server did not become ready: ${String(lastError)}`);
+  throw new Error(`Serve server did not become ready: ${String(lastError)}`);
 }
 
 describe('Flatwave example e2e', () => {
   beforeAll(() => {
     execFileSync('npm', ['run', 'build', '-w', pluginWorkspace], { cwd: root, stdio: 'pipe' });
     execFileSync('npm', ['run', 'build', '-w', exampleWorkspace], { cwd: root, stdio: 'pipe' });
-    preview = spawn('npm', ['run', 'preview', '-w', exampleWorkspace], {
-      cwd: root,
+    serve = spawn('npx', ['serve', 'dist', '-l', '4173'], {
+      cwd: path.resolve(root, 'examples/basic-react-site'),
       stdio: 'pipe',
       env: { ...process.env, FORCE_COLOR: '0' },
     });
   }, 120_000);
 
   afterAll(() => {
-    preview?.kill();
+    serve?.kill();
   });
 
   it('builds the plugin and example static site', () => {
@@ -78,8 +78,8 @@ describe('Flatwave example e2e', () => {
     expect(robots).toContain('Sitemap: http://localhost:4173/sitemap.xml');
   });
 
-  it('serves localized routes from the preview server', async () => {
-    await waitForPreview();
+  it('serves localized routes from the static server', async () => {
+    await waitForServe();
 
     const response = await fetch('http://127.0.0.1:4173/es/program');
     const html = await response.text();
