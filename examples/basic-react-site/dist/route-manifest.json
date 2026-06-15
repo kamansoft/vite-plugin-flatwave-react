@@ -1,0 +1,224 @@
+[
+  {
+    "locale": "es",
+    "path": "/es/",
+    "contentId": "home",
+    "component": "SimplePage",
+    "metadata": {
+      "title": "Inicio",
+      "description": "Página de inicio del ejemplo Flatwave.",
+      "canonical": "/es/",
+      "robots": "index, follow",
+      "keywords": [
+        "flatwave",
+        "ejemplo"
+      ]
+    },
+    "frontmatter": {
+      "title": "Inicio",
+      "slug": "index",
+      "id": "home",
+      "component": "SimplePage",
+      "public": true,
+      "description": "Página de inicio del ejemplo Flatwave.",
+      "canonical": "/es/",
+      "robots": "index, follow",
+      "keywords": [
+        "flatwave",
+        "ejemplo"
+      ],
+      "menu": "main",
+      "menu_position": 1
+    },
+    "alternatives": {
+      "es": "/es/",
+      "pt": "/pt/"
+    }
+  },
+  {
+    "locale": "es",
+    "path": "/es/about",
+    "contentId": "about",
+    "component": "SimplePage",
+    "metadata": {
+      "title": "Acerca de",
+      "description": "Página acerca del ejemplo Flatwave.",
+      "canonical": "/es/about",
+      "robots": "index, follow",
+      "keywords": [
+        "flatwave",
+        "acerca"
+      ]
+    },
+    "frontmatter": {
+      "title": "Acerca de",
+      "slug": "about",
+      "id": "about",
+      "component": "SimplePage",
+      "public": true,
+      "description": "Página acerca del ejemplo Flatwave.",
+      "canonical": "/es/about",
+      "robots": "index, follow",
+      "keywords": [
+        "flatwave",
+        "acerca"
+      ],
+      "menu": "main",
+      "menu_position": 2
+    },
+    "alternatives": {
+      "es": "/es/about",
+      "pt": "/pt/about"
+    }
+  },
+  {
+    "locale": "es",
+    "path": "/es/program",
+    "contentId": "program",
+    "component": "ProgramPage",
+    "metadata": {
+      "title": "Programa",
+      "description": "Página de programa con frontmatter específico del componente.",
+      "canonical": "/es/program",
+      "robots": "index, follow",
+      "keywords": [
+        "programa"
+      ]
+    },
+    "frontmatter": {
+      "title": "Programa",
+      "slug": "program",
+      "id": "program",
+      "component": "ProgramPage",
+      "public": true,
+      "description": "Página de programa con frontmatter específico del componente.",
+      "canonical": "/es/program",
+      "robots": "index, follow",
+      "keywords": [
+        "programa"
+      ],
+      "menu": "main",
+      "menu_position": 3,
+      "date": "2026-06-14",
+      "schedule": {
+        "start": "20:00",
+        "end": "22:00"
+      }
+    },
+    "alternatives": {
+      "es": "/es/program",
+      "pt": "/pt/program"
+    }
+  },
+  {
+    "locale": "pt",
+    "path": "/pt/",
+    "contentId": "home",
+    "component": "SimplePage",
+    "metadata": {
+      "title": "Início",
+      "description": "Página inicial do exemplo Flatwave.",
+      "canonical": "/pt/",
+      "robots": "index, follow",
+      "keywords": [
+        "flatwave",
+        "exemplo"
+      ]
+    },
+    "frontmatter": {
+      "title": "Início",
+      "slug": "index",
+      "id": "home",
+      "component": "SimplePage",
+      "public": true,
+      "description": "Página inicial do exemplo Flatwave.",
+      "canonical": "/pt/",
+      "robots": "index, follow",
+      "keywords": [
+        "flatwave",
+        "exemplo"
+      ],
+      "menu": "main",
+      "menu_position": 1
+    },
+    "alternatives": {
+      "es": "/es/",
+      "pt": "/pt/"
+    }
+  },
+  {
+    "locale": "pt",
+    "path": "/pt/about",
+    "contentId": "about",
+    "component": "SimplePage",
+    "metadata": {
+      "title": "Sobre",
+      "description": "Página sobre o exemplo Flatwave.",
+      "canonical": "/pt/about",
+      "robots": "index, follow",
+      "keywords": [
+        "flatwave",
+        "sobre"
+      ]
+    },
+    "frontmatter": {
+      "title": "Sobre",
+      "slug": "about",
+      "id": "about",
+      "component": "SimplePage",
+      "public": true,
+      "description": "Página sobre o exemplo Flatwave.",
+      "canonical": "/pt/about",
+      "robots": "index, follow",
+      "keywords": [
+        "flatwave",
+        "sobre"
+      ],
+      "menu": "main",
+      "menu_position": 2
+    },
+    "alternatives": {
+      "es": "/es/about",
+      "pt": "/pt/about"
+    }
+  },
+  {
+    "locale": "pt",
+    "path": "/pt/program",
+    "contentId": "program",
+    "component": "ProgramPage",
+    "metadata": {
+      "title": "Programa",
+      "description": "Página de programa com frontmatter específico do componente.",
+      "canonical": "/pt/program",
+      "robots": "index, follow",
+      "keywords": [
+        "programa"
+      ]
+    },
+    "frontmatter": {
+      "title": "Programa",
+      "slug": "program",
+      "id": "program",
+      "component": "ProgramPage",
+      "public": true,
+      "description": "Página de programa com frontmatter específico do componente.",
+      "canonical": "/pt/program",
+      "robots": "index, follow",
+      "keywords": [
+        "programa"
+      ],
+      "menu": "main",
+      "menu_position": 3,
+      "date": "2026-06-14",
+      "schedule": {
+        "start": "20:00",
+        "end": "22:00"
+      }
+    },
+    "alternatives": {
+      "es": "/es/program",
+      "pt": "/pt/program"
+    }
+  }
+]
