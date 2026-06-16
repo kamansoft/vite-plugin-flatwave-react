@@ -1,3 +1,10 @@
 node_modules/
 dist/
+dist-ssr/
+*.log
+.env
+.env.local
+coverage/
+test-build-output/
+test-e2e-output/
 *.tsbuildinfo

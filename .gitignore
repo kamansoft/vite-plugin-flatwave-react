@@ -1,7 +1,17 @@
 node_modules/
 dist/
+dist-ssr/
 *.log
-.DS_Store
+.env
+.env.local
+coverage/
+test-build-output/
+test-e2e-output/
+
+# Example app build outputs
+examples/*/dist/
+examples/*/dist-ssr/
+examples/*/node_modules/
 
 # AI / editor tool directories (local tooling, not project source)
 .agent/
@@ -17,3 +27,6 @@ dist/
 # Dev notes and working docs
 dev-notes/
 current-working-project-with-features/
+
+# TypeScript build cache
+*.tsbuildinfo
