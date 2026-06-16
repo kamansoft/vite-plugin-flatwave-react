@@ -5,19 +5,22 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 8080",
-    "build": "vite build",
+    "build": "vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr",
+    "prerender": "node scripts/prerender.mjs",
     "preview": "vite preview --host 0.0.0.0 --port 4173"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.4",
+    "markdown-it": "^14.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^9.0.3",
-    "@kamansoft/vite-plugin-flatwave-react": "file:../../packages/vite-plugin-flatwave-react"
+    "vite-plugin-flatwave-react": "0.1.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "gray-matter": "^4.0.3",
     "typescript": "^5.7.2",
     "vite": "^6.0.7"
   }

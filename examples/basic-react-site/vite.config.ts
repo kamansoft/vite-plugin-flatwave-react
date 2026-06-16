@@ -15,6 +15,8 @@ export default defineConfig({
       sitemap: {
         hostname: 'http://localhost:4173',
       },
+      prerender: true,
+      ssrEntry: 'src/entry-server.tsx',
     }),
   ],
   build: {

@@ -5,111 +5,104 @@ import { validateContent } from './content/validator.js';
 import { parseMarkdown } from './content/parser.js';
 import { routeForLocaleSlug } from './content/scanner.js';
 import { escapeHtml, escapeXml, renderHtmlHead } from './seo/metadata.js';
-import type { FlatwaveContentIndex, FlatwaveContentOptions, FlatwaveRoute } from './types';
+import { createPrerenderPlugin } from './prerender/index.js';
+import type { FlatwaveContentEntry, FlatwaveContentIndex, FlatwaveContentOptions, FlatwaveRoute, NormalizedOptions } from './types';
 
 const VIRTUAL_ID = '\0virtual:flatwave/content';
 const PUBLIC_VIRTUAL_ID = 'virtual:flatwave/content';
 
-// Test comment for lint-staged
-export function flatwaveContent(options: FlatwaveContentOptions): Plugin[] {
+export async function flatwaveContent(options: FlatwaveContentOptions): Promise<Plugin[]> {
   const normalizedOptions = normalizeOptions(options);
   let index: FlatwaveContentIndex = { entries: [], byId: {}, byLocale: {}, routes: [] };
 
-  return [
-    {
-      name: 'flatwave-react:content',
-      enforce: 'pre',
-      async buildStart() {
-        index = await buildIndex(normalizedOptions);
-        const validation = await validateContent(normalizedOptions);
+  const contentPlugin: Plugin = {
+    name: 'flatwave-react:content',
+    enforce: 'pre',
+    async buildStart() {
+      index = await buildIndex(normalizedOptions);
+      const validation = await validateContent(normalizedOptions);
 
-        for (const warning of validation.warnings) this.warn(warning);
-        for (const error of validation.errors) this.error(error);
-      },
-      resolveId(id) {
-        if (id === PUBLIC_VIRTUAL_ID) return VIRTUAL_ID;
-        return null;
-      },
-      load(id) {
-        if (id !== VIRTUAL_ID) return null;
-        return createVirtualModule(index, normalizedOptions.defaultLocale);
-      },
-      async handleHotUpdate(ctx) {
-        if (!ctx.file.endsWith('.md')) return;
-        index = await buildIndex(normalizedOptions);
-      },
+      for (const warning of validation.warnings) this.warn(warning);
+      for (const error of validation.errors) this.error(error);
     },
-    {
-      name: 'flatwave-react:markdown',
-      enforce: 'pre',
-      resolveId(id) {
-        if (id.endsWith('.md')) {
-          const resolved = path.resolve(process.cwd(), id);
-          return resolved;
-        }
-        return null;
-      },
-      async load(id) {
-        if (!id.endsWith('.md')) return null;
-        const source = await readFile(id);
-        const parsed = parseMarkdown(source);
-        const locale =
-          inferLocale(id, normalizedOptions.contentDir, normalizedOptions.locales) ??
-          normalizedOptions.defaultLocale;
-        const slug = path.basename(id, '.md');
-        const route = routeForLocaleSlug(locale, slug);
-        const idValue = slug;
-
-        return `export default ${JSON.stringify(
-          {
-            body: parsed.body,
-            attributes: parsed.attributes,
-            frontmatter: parsed.frontmatter,
-            locale,
-            slug,
-            id: idValue,
-            route,
-            file: id,
-          },
-          null,
-          2
-        )};`;
-      },
+    resolveId(id) {
+      if (id === PUBLIC_VIRTUAL_ID) return VIRTUAL_ID;
+      return null;
     },
-    {
-      name: 'flatwave-react:ssg',
-      async generateBundle(_, bundle) {
-        const routes = index.routes;
-        const html = findIndexHtml(bundle);
-        const assets = extractAssets(html);
+    load(id) {
+      if (id !== VIRTUAL_ID) return null;
+      return createVirtualModule(index, normalizedOptions.defaultLocale);
+    },
+    async handleHotUpdate(ctx) {
+      if (!ctx.file.endsWith('.md')) return;
+      index = await buildIndex(normalizedOptions);
+    },
+  };
 
-        if (normalizedOptions.emitRouteManifest !== false) {
-          this.emitFile({
-            type: 'asset',
-            fileName: 'route-manifest.json',
-            source: JSON.stringify(routes, null, 2),
-          });
-        }
+  const markdownPlugin: Plugin = {
+    name: 'flatwave-react:markdown',
+    enforce: 'pre',
+    resolveId(id) {
+      if (id.endsWith('.md')) {
+        const resolved = path.resolve(process.cwd(), id);
+        return resolved;
+      }
+      return null;
+    },
+    async load(id) {
+      if (!id.endsWith('.md')) return null;
+      const source = await readFile(id);
+      const parsed = parseMarkdown(source);
+      const locale = inferLocale(id, normalizedOptions.contentDir, normalizedOptions.locales) ?? normalizedOptions.defaultLocale;
+      const slug = path.basename(id, '.md');
+      const route = routeForLocaleSlug(locale, slug);
+      const idValue = slug;
 
-        if (normalizedOptions.emitSitemap !== false) {
-          this.emitFile({
-            type: 'asset',
-            fileName: 'sitemap.xml',
-            source: renderSitemap(
-              routes,
-              normalizedOptions.sitemap?.hostname ?? 'http://localhost:4173'
-            ),
-          });
-        }
+      return `export default ${JSON.stringify({
+        body: parsed.body,
+        attributes: parsed.attributes,
+        frontmatter: parsed.frontmatter,
+        locale,
+        slug,
+        id: idValue,
+        route,
+        file: id,
+      }, null, 2)};`;
+    },
+  };
 
-        if (normalizedOptions.emitRobotsTxt !== false) {
-          this.emitFile({
-            type: 'asset',
-            fileName: 'robots.txt',
-            source: renderRobotsTxt(normalizedOptions.sitemap?.hostname ?? 'http://localhost:4173'),
-          });
-        }
+  const ssgPlugin: Plugin = {
+    name: 'flatwave-react:ssg',
+    async generateBundle(_, bundle) {
+      const routes = index.routes;
+      const html = findIndexHtml(bundle);
+      const assets = extractAssets(html);
 
+      if (normalizedOptions.emitRouteManifest !== false) {
+        this.emitFile({
+          type: 'asset',
+          fileName: 'route-manifest.json',
+          source: JSON.stringify(routes, null, 2),
+        });
+      }
+
+      if (normalizedOptions.emitSitemap !== false) {
+        this.emitFile({
+          type: 'asset',
+          fileName: 'sitemap.xml',
+          source: renderSitemap(routes, normalizedOptions.sitemap?.hostname ?? 'http://localhost:4173'),
+        });
+      }
+
+      if (normalizedOptions.emitRobotsTxt !== false) {
+        this.emitFile({
+          type: 'asset',
+          fileName: 'robots.txt',
+          source: renderRobotsTxt(normalizedOptions.sitemap?.hostname ?? 'http://localhost:4173'),
+        });
+      }
+
+      if (!normalizedOptions.prerender) {
         for (const route of routes) {
           this.emitFile({
             type: 'asset',
@@ -117,12 +110,16 @@ export function flatwaveContent(options: FlatwaveContentOptions): Plugin[] {
             source: renderRouteHtml(route, assets),
           });
         }
-      },
+      }
     },
-  ];
+  };
+
+  const prerenderPlugin = await createPrerenderPlugin(normalizedOptions, index);
+
+  return [contentPlugin, markdownPlugin, ssgPlugin, prerenderPlugin];
 }
 
-function normalizeOptions(options: FlatwaveContentOptions): FlatwaveContentOptions {
+function normalizeOptions(options: FlatwaveContentOptions): NormalizedOptions {
   if (!options.locales.includes(options.defaultLocale)) {
     throw new Error(`defaultLocale '${options.defaultLocale}' must be included in locales.`);
   }
@@ -135,6 +132,9 @@ function normalizeOptions(options: FlatwaveContentOptions): FlatwaveContentOptio
     emitRouteManifest: options.emitRouteManifest ?? true,
     emitSitemap: options.emitSitemap ?? true,
     emitRobotsTxt: options.emitRobotsTxt ?? true,
+    template: options.template,
+    prerender: options.prerender,
+    ssrEntry: options.ssrEntry,
   };
 }
 
@@ -196,13 +196,7 @@ function inferLocale(file: string, contentDir: string, locales: string[]): strin
 
 function findIndexHtml(bundle: Record<string, unknown>): string | undefined {
   for (const item of Object.values(bundle)) {
-    if (
-      item &&
-      typeof item === 'object' &&
-      'fileName' in item &&
-      item.fileName === 'index.html' &&
-      'source' in item
-    ) {
+    if (item && typeof item === 'object' && 'fileName' in item && item.fileName === 'index.html' && 'source' in item) {
       return String((item as { source?: unknown }).source);
     }
   }
@@ -211,12 +205,8 @@ function findIndexHtml(bundle: Record<string, unknown>): string | undefined {
 
 function extractAssets(html: string | undefined): { scripts: string[]; styles: string[] } {
   if (!html) return { scripts: [], styles: [] };
-  const scripts = [...html.matchAll(/<script[^>]+src="([^"]+\.js)"[^>]*>/g)].map(
-    (match) => match[1]
-  );
-  const styles = [
-    ...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+\.css)"[^>]*>/g),
-  ].map((match) => match[1]);
+  const scripts = [...html.matchAll(/<script[^>]+src="([^"]+\.js)"[^>]*>/g)].map((match) => match[1]);
+  const styles = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+\.css)"[^>]*>/g)].map((match) => match[1]);
   return { scripts, styles };
 }
 
@@ -243,16 +233,9 @@ Sitemap: ${base}/sitemap.xml
 `;
 }
 
-function renderRouteHtml(
-  route: FlatwaveRoute,
-  assets: { scripts: string[]; styles: string[] }
-): string {
-  const scripts = assets.scripts
-    .map((src) => `<script type="module" crossorigin src="${escapeHtml(src)}"></script>`)
-    .join('\n');
-  const styles = assets.styles
-    .map((href) => `<link rel="stylesheet" href="${escapeHtml(href)}">`)
-    .join('\n');
+function renderRouteHtml(route: FlatwaveRoute, assets: { scripts: string[]; styles: string[] }): string {
+  const scripts = assets.scripts.map((src) => `<script type="module" crossorigin src="${escapeHtml(src)}"></script>`).join('\n');
+  const styles = assets.styles.map((href) => `<link rel="stylesheet" href="${escapeHtml(href)}">`).join('\n');
   const title = escapeHtml(route.metadata.title);
   const description = route.metadata.description ? escapeHtml(route.metadata.description) : title;
 

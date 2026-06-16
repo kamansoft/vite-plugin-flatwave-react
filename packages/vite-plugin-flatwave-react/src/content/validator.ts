@@ -27,9 +27,7 @@ export async function validateContent(options: FlatwaveContentOptions): Promise<
       path: route,
       file: file.file,
       component: file.frontmatter.component ? String(file.frontmatter.component) : undefined,
-      public:
-        file.frontmatter.public !== false &&
-        String(file.frontmatter.public ?? 'true').toLowerCase() !== 'false',
+      public: file.frontmatter.public !== false && String(file.frontmatter.public ?? 'true').toLowerCase() !== 'false',
       attributes: file.frontmatter,
       frontmatter: file.frontmatter,
       body: file.body,
@@ -43,21 +41,14 @@ export async function validateContent(options: FlatwaveContentOptions): Promise<
     warnings.push(`No public routes were generated from ${options.contentDir}.`);
   }
 
-  if (
-    options.strictMissingLocales &&
-    warnings.some((warning) => warning.startsWith('[missing-locale]'))
-  ) {
+  if (options.strictMissingLocales && warnings.some((warning) => warning.startsWith('[missing-locale]'))) {
     errors.push(...warnings.filter((warning) => warning.startsWith('[missing-locale]')));
   }
 
   return { errors, warnings };
 }
 
-async function validateRequiredFields(
-  files: Awaited<ReturnType<typeof scanMarkdownFiles>>,
-  requiredFields: string[],
-  errors: string[]
-): Promise<void> {
+async function validateRequiredFields(files: Awaited<ReturnType<typeof scanMarkdownFiles>>, requiredFields: string[], errors: string[]): Promise<void> {
   for (const file of files) {
     for (const field of requiredFields) {
       const value = file.frontmatter[field as keyof typeof file.frontmatter];
@@ -68,47 +59,34 @@ async function validateRequiredFields(
   }
 }
 
-async function validateDuplicateIds(
-  files: Awaited<ReturnType<typeof scanMarkdownFiles>>,
-  errors: string[]
-): Promise<void> {
+async function validateDuplicateIds(files: Awaited<ReturnType<typeof scanMarkdownFiles>>, errors: string[]): Promise<void> {
   const seen = new Map<string, string>();
   for (const file of files) {
     const id = String(file.frontmatter.id || file.slug);
     const key = `${file.locale}:${id}`;
     const previous = seen.get(key);
     if (previous) {
-      errors.push(
-        `[${file.locale}] ${file.file}: Duplicate content id '${id}'. First occurrence: ${previous}`
-      );
+      errors.push(`[${file.locale}] ${file.file}: Duplicate content id '${id}'. First occurrence: ${previous}`);
     } else {
       seen.set(key, file.file);
     }
   }
 }
 
-async function validateDuplicateSlugs(
-  files: Awaited<ReturnType<typeof scanMarkdownFiles>>,
-  errors: string[]
-): Promise<void> {
+async function validateDuplicateSlugs(files: Awaited<ReturnType<typeof scanMarkdownFiles>>, errors: string[]): Promise<void> {
   const seen = new Map<string, string>();
   for (const file of files) {
     const key = `${file.locale}:${file.slug}`;
     const previous = seen.get(key);
     if (previous) {
-      errors.push(
-        `[${file.locale}] ${file.file}: Duplicate slug '${file.slug}'. First occurrence: ${previous}`
-      );
+      errors.push(`[${file.locale}] ${file.file}: Duplicate slug '${file.slug}'. First occurrence: ${previous}`);
     } else {
       seen.set(key, file.file);
     }
   }
 }
 
-async function validateMenuPositions(
-  files: Awaited<ReturnType<typeof scanMarkdownFiles>>,
-  errors: string[]
-): Promise<void> {
+async function validateMenuPositions(files: Awaited<ReturnType<typeof scanMarkdownFiles>>, errors: string[]): Promise<void> {
   const seen = new Map<string, string>();
   for (const file of files) {
     const menu = file.frontmatter.menu;
@@ -116,28 +94,20 @@ async function validateMenuPositions(
     if (menu === undefined || menu === '' || position === undefined || position === '') continue;
     const numeric = Number(position);
     if (Number.isNaN(numeric)) {
-      errors.push(
-        `[${file.locale}] ${file.file}: menu_position must be a number when menu is set.`
-      );
+      errors.push(`[${file.locale}] ${file.file}: menu_position must be a number when menu is set.`);
       continue;
     }
     const key = `${file.locale}:${menu}:${numeric}`;
     const previous = seen.get(key);
     if (previous) {
-      errors.push(
-        `[${file.locale}] ${file.file}: Duplicate menu/menu_position '${menu}/${numeric}'. First occurrence: ${previous}`
-      );
+      errors.push(`[${file.locale}] ${file.file}: Duplicate menu/menu_position '${menu}/${numeric}'. First occurrence: ${previous}`);
     } else {
       seen.set(key, file.file);
     }
   }
 }
 
-async function validateComponents(
-  files: Awaited<ReturnType<typeof scanMarkdownFiles>>,
-  options: FlatwaveContentOptions,
-  errors: string[]
-): Promise<void> {
+async function validateComponents(files: Awaited<ReturnType<typeof scanMarkdownFiles>>, options: FlatwaveContentOptions, errors: string[]): Promise<void> {
   if (options.validateComponents === false) return;
 
   const available = await discoverComponents(options.componentsDir);
@@ -145,29 +115,20 @@ async function validateComponents(
     const component = file.frontmatter.component ? String(file.frontmatter.component) : undefined;
     if (!component) continue;
     if (!available.has(component)) {
-      errors.push(
-        `[${file.locale}] ${file.file}: Component '${component}' does not exist in ${formatComponentsDir(options.componentsDir)}.`
-      );
+      errors.push(`[${file.locale}] ${file.file}: Component '${component}' does not exist in ${formatComponentsDir(options.componentsDir)}.`);
     }
   }
 }
 
-async function discoverComponents(componentsDir?: string | string[]): Promise<Set<string>> {
-  const dirs = Array.isArray(componentsDir)
-    ? componentsDir
-    : componentsDir
-      ? [componentsDir]
-      : ['src/components', 'src/pages'];
+export async function discoverComponents(componentsDir?: string | string[]): Promise<Set<string>> {
+  const dirs = Array.isArray(componentsDir) ? componentsDir : componentsDir ? [componentsDir] : ['src/components', 'src/pages'];
   const components = new Set<string>();
 
   for (const dir of dirs) {
     const absolute = path.resolve(dir);
     let files: Array<{ isFile: () => boolean; name: string }>;
     try {
-      files = (await readdir(absolute, { withFileTypes: true })) as Array<{
-        isFile: () => boolean;
-        name: string;
-      }>;
+      files = (await readdir(absolute, { withFileTypes: true })) as Array<{ isFile: () => boolean; name: string }>;
     } catch {
       continue;
     }
@@ -182,11 +143,7 @@ async function discoverComponents(componentsDir?: string | string[]): Promise<Se
   return components;
 }
 
-function validateMissingLocales(
-  files: Awaited<ReturnType<typeof scanMarkdownFiles>>,
-  options: FlatwaveContentOptions,
-  warnings: string[]
-): void {
+function validateMissingLocales(files: Awaited<ReturnType<typeof scanMarkdownFiles>>, options: FlatwaveContentOptions, warnings: string[]): void {
   const idsByLocale = new Map<string, Set<string>>();
   for (const file of files) {
     const id = String(file.frontmatter.id || file.slug);
