@@ -1,0 +1,148 @@
+[
+  {
+    "locale": "es",
+    "path": "/es/",
+    "contentId": "index",
+    "component": "SimplePage",
+    "metadata": {
+      "title": "Inicio",
+      "description": "Página de inicio",
+      "canonical": "/es/",
+      "robots": "index, follow"
+    },
+    "frontmatter": {
+      "title": "Inicio",
+      "slug": "index",
+      "id": "index",
+      "component": "SimplePage",
+      "description": "Página de inicio",
+      "public": true
+    },
+    "alternatives": {
+      "es": "/es/",
+      "pt": "/pt/"
+    }
+  },
+  {
+    "locale": "es",
+    "path": "/es/about",
+    "contentId": "about",
+    "component": "SimplePage",
+    "metadata": {
+      "title": "Acerca de",
+      "description": "Página acerca de",
+      "canonical": "/es/about",
+      "robots": "index, follow"
+    },
+    "frontmatter": {
+      "title": "Acerca de",
+      "slug": "about",
+      "id": "about",
+      "component": "SimplePage",
+      "description": "Página acerca de",
+      "public": true
+    },
+    "alternatives": {
+      "es": "/es/about",
+      "pt": "/pt/about"
+    }
+  },
+  {
+    "locale": "es",
+    "path": "/es/program",
+    "contentId": "program",
+    "component": "SimplePage",
+    "metadata": {
+      "title": "Programa",
+      "description": "Página del programa",
+      "canonical": "/es/program",
+      "robots": "index, follow"
+    },
+    "frontmatter": {
+      "title": "Programa",
+      "slug": "program",
+      "id": "program",
+      "component": "SimplePage",
+      "description": "Página del programa",
+      "public": true,
+      "date": "2026-06-14"
+    },
+    "alternatives": {
+      "es": "/es/program",
+      "pt": "/pt/program"
+    }
+  },
+  {
+    "locale": "pt",
+    "path": "/pt/",
+    "contentId": "index",
+    "component": "SimplePage",
+    "metadata": {
+      "title": "Início",
+      "description": "Página inicial",
+      "canonical": "/pt/",
+      "robots": "index, follow"
+    },
+    "frontmatter": {
+      "title": "Início",
+      "slug": "index",
+      "id": "index",
+      "component": "SimplePage",
+      "description": "Página inicial",
+      "public": true
+    },
+    "alternatives": {
+      "es": "/es/",
+      "pt": "/pt/"
+    }
+  },
+  {
+    "locale": "pt",
+    "path": "/pt/about",
+    "contentId": "about",
+    "component": "SimplePage",
+    "metadata": {
+      "title": "Sobre",
+      "description": "Página sobre",
+      "canonical": "/pt/about",
+      "robots": "index, follow"
+    },
+    "frontmatter": {
+      "title": "Sobre",
+      "slug": "about",
+      "id": "about",
+      "component": "SimplePage",
+      "description": "Página sobre",
+      "public": true
+    },
+    "alternatives": {
+      "es": "/es/about",
+      "pt": "/pt/about"
+    }
+  },
+  {
+    "locale": "pt",
+    "path": "/pt/program",
+    "contentId": "program",
+    "component": "SimplePage",
+    "metadata": {
+      "title": "Programa",
+      "description": "Página do programa",
+      "canonical": "/pt/program",
+      "robots": "index, follow"
+    },
+    "frontmatter": {
+      "title": "Programa",
+      "slug": "program",
+      "id": "program",
+      "component": "SimplePage",
+      "description": "Página do programa",
+      "public": true,
+      "date": "2026-06-14"
+    },
+    "alternatives": {
+      "es": "/es/program",
+      "pt": "/pt/program"
+    }
+  }
+]

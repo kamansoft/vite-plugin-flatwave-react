@@ -9,6 +9,12 @@ export interface FlatwaveRobotsOptions {
     sitemapPath?: string;
     rules?: string[];
 }
+export interface PrerenderOptions {
+    routes?: string[] | ((routes: FlatwaveRoute[]) => string[]);
+    exclude?: string[];
+    stream?: boolean;
+    template?: string;
+}
 export interface FlatwaveContentOptions {
     contentDir: string;
     locales: string[];
@@ -23,6 +29,9 @@ export interface FlatwaveContentOptions {
     emitRobotsTxt?: boolean;
     sitemap?: FlatwaveSitemapOptions;
     robots?: FlatwaveRobotsOptions;
+    template?: string;
+    prerender?: boolean | PrerenderOptions;
+    ssrEntry?: string;
 }
 export interface FlatwaveFrontmatter extends Record<string, unknown> {
     title: string;
@@ -84,4 +93,22 @@ export interface SeoMetadata {
 export interface ValidationResult {
     errors: string[];
     warnings: string[];
+}
+export interface NormalizedOptions {
+    contentDir: string;
+    locales: string[];
+    defaultLocale: string;
+    fallback?: FlatwaveFallbackPolicy;
+    strictMissingLocales?: boolean;
+    requiredFields: string[];
+    validateComponents: boolean;
+    componentsDir?: string | string[];
+    emitRouteManifest: boolean;
+    emitSitemap: boolean;
+    emitRobotsTxt: boolean;
+    sitemap?: FlatwaveSitemapOptions;
+    robots?: FlatwaveRobotsOptions;
+    template?: string;
+    prerender?: PrerenderOptions | true | false;
+    ssrEntry?: string;
 }

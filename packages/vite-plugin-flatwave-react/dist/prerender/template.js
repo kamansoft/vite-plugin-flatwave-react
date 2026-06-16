@@ -1,0 +1,52 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+export async function loadTemplate(templatePath) {
+    if (templatePath) {
+        const absolutePath = path.resolve(templatePath);
+        return readFile(absolutePath, 'utf-8');
+    }
+    const defaultPath = path.resolve('index.html');
+    try {
+        return await readFile(defaultPath, 'utf-8');
+    }
+    catch {
+        return `<!doctype html>
+<html lang="{{locale}}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+  {{head}}
+</head>
+<body>
+  <div id="root">{{appHtml}}</div>
+  {{scripts}}
+</body>
+</html>`;
+    }
+}
+export function extractAssets(html) {
+    const scripts = [...html.matchAll(/<script[^>]+src="([^"]+\.js)"[^>]*>/g)].map((match) => match[1]);
+    const styles = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+\.css)"[^>]*>/g)].map((match) => match[1]);
+    return { scripts, styles };
+}
+export function injectIntoTemplate(template, appHtml, route, assets) {
+    const scripts = assets.scripts.map((src) => `<script type="module" crossorigin src="${src}"></script>`).join('\n');
+    const styles = assets.styles.map((href) => `<link rel="stylesheet" href="${href}">`).join('\n');
+    let result = template
+        .replace(/{{appHtml}}/g, appHtml)
+        .replace(/{{scripts}}/g, scripts)
+        .replace(/{{styles}}/g, styles)
+        .replace(/{{locale}}/g, route.locale)
+        .replace(/{{title}}/g, route.metadata.title)
+        .replace(/{{head}}/g, '');
+    return result;
+}
+export function injectPreRenderedHtml(template, preRenderedHtml, route, assets) {
+    const scripts = assets.scripts.map((src) => `<script type="module" crossorigin src="${src}"></script>`).join('\n');
+    const styles = assets.styles.map((href) => `<link rel="stylesheet" href="${href}">`).join('\n');
+    const fullHtml = preRenderedHtml
+        .replace('</head>', `${styles}\n</head>`)
+        .replace('</body>', `${scripts}\n</body>`);
+    return fullHtml;
+}
