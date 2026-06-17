@@ -4,8 +4,7 @@
 
 ### ⚠ BREAKING CHANGES
 
-- **automation:** basic scaffolding for linting formating and pipelines
-- **automation:** basic scaffolding for linting formating and pipelines
+- **automation:** basic scaffolding for linting formatting and pipelines
 
 ### Features
 
