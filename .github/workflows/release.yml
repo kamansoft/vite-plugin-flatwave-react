@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write # @semantic-release/github: create the GitHub Release and git tag
   issues: write # @semantic-release/github: comment on released issues
+  id-token: write # @semantic-release/npm: required for npm trusted publishing (OIDC)
   pull-requests: write # @semantic-release/github: comment on released pull requests
 
 jobs:
@@ -40,5 +41,3 @@ jobs:
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
