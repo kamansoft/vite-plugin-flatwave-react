@@ -2,3 +2,18 @@ node_modules/
 dist/
 *.log
 .DS_Store
+
+# AI / editor tool directories (local tooling, not project source)
+.agent/
+.claude/
+.codex/
+.cursor/
+.gemini/
+.kilo/
+.kilocode/
+.opencode/
+.trae/
+
+# Dev notes and working docs
+dev-notes/
+current-working-project-with-features/

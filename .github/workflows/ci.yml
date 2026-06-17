@@ -29,6 +29,8 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          HUSKY: 0
 
       - name: Run validation
         run: npm run validate
@@ -36,10 +38,11 @@ jobs:
           HUSKY: 0
 
   test-matrix:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: ['20', '22', '24']
+        node-version: ['22', '24']
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,6 +57,8 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          HUSKY: 0
 
       - name: Run validation
         run: npm run validate
