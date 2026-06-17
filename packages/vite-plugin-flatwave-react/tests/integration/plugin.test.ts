@@ -148,6 +148,7 @@ describe('Integration: plugin with prerender option', () => {
           defaultLocale: 'es',
           componentsDir: path.resolve(fixtureDir, 'src/components'),
           prerender: true,
+          ssrEntry: path.resolve(fixtureDir, 'src/entry-server.tsx'),
         }),
       ],
     });

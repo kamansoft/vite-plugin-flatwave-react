@@ -41,27 +41,25 @@ export async function createRenderer(
     throw new Error(`Failed to load SSR entry module: ${ssrEntry}\n${error instanceof Error ? error.message : String(error)}`);
   }
 
-  const wrappedRenderer: Renderer = {
-    async render(url: string, pageContext: PageContext): Promise<string> {
-      const route = index.routes.find((r) => r.path === url);
-      if (!route) {
-        throw new Error(`Route not found: ${url}`);
-      }
+  const wrappedRenderer: Renderer = async (url: string, pageContext: PageContext): Promise<string> => {
+    const route = index.routes.find((r) => r.path === url);
+    if (!route) {
+      throw new Error(`Route not found: ${url}`);
+    }
 
-      const content = pageContext.content;
-      if (!content) {
-        throw new Error(`Content not found for route: ${url}`);
-      }
+    const content = pageContext.content;
+    if (!content) {
+      throw new Error(`Content not found for route: ${url}`);
+    }
 
-      const ctx: PageContext = {
-        locale: route.locale,
-        content,
-        route,
-        components: { ...componentRegistry, ...pageContext.components },
-      };
+    const ctx: PageContext = {
+      locale: route.locale,
+      content,
+      route,
+      components: { ...componentRegistry, ...pageContext.components },
+    };
 
-      return renderer(url, ctx);
-    },
+    return renderer(url, ctx);
   };
 
   return wrappedRenderer;
@@ -110,7 +108,7 @@ export async function createPrerenderer(
           components: {},
         };
 
-        const appHtml = await renderer.render(route.path, pageContext);
+        const appHtml = await renderer(route.path, pageContext);
         
         const serializedContext = serializePageContext(buildPageContext(route, content));
         const htmlWithContext = injectPageContextScript(appHtml, serializedContext);

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { filterRoutesForPrerender } from '../../../src/prerender/renderer.js';
+import { filterRoutesForPrerender } from '../../../src/render/page.js';
 import type { FlatwaveRoute, FlatwaveContentIndex, NormalizedOptions } from '../../../src/types.js';
 
 describe('prerender/renderer', () => {

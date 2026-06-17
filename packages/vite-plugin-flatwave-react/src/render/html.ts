@@ -85,6 +85,26 @@ export function renderHtmlShell(
   return result;
 }
 
+export function injectIntoTemplate(
+  template: string,
+  appHtml: string,
+  route: { locale: string; metadata: { title: string; canonical?: string } },
+  assets: TemplateAssets
+): string {
+  const scripts = assets.scripts.map((src) => `<script type="module" crossorigin src="${src}"></script>`).join('\n');
+  const styles = assets.styles.map((href) => `<link rel="stylesheet" href="${href}">`).join('\n');
+  
+  let result = template
+    .replace(/{{appHtml}}/g, appHtml)
+    .replace(/{{scripts}}/g, scripts)
+    .replace(/{{styles}}/g, styles)
+    .replace(/{{locale}}/g, route.locale)
+    .replace(/{{title}}/g, route.metadata.title)
+    .replace(/{{head}}/g, '');
+
+  return result;
+}
+
 export function renderRouteHtml(
   route: FlatwaveRoute,
   assets: TemplateAssets,

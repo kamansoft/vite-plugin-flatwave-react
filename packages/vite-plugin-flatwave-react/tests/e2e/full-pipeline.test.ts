@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'vite';
 import { flatwaveContent } from '../../src/index.js';
-import { createPrerenderer } from '../../src/prerender/index.js';
+import { createPrerenderer } from '../../src/render/server.js';
 import type { FlatwaveContentIndex } from '../../src/types.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -87,6 +87,7 @@ describe('E2E: Prerenderer function', () => {
       defaultLocale: 'es',
       componentsDir: path.resolve(fixtureDir, 'src/components'),
       prerender: true,
+      ssrEntry: path.resolve(fixtureDir, 'src/entry-server.tsx'),
     });
 
     await build({

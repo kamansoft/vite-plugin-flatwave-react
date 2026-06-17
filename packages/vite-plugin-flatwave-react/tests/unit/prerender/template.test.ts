@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { loadTemplate, extractAssets, injectPreRenderedHtml, injectIntoTemplate } from '../../../src/prerender/template.js';
+import { loadTemplate, extractAssets, injectPreRenderedHtml, injectIntoTemplate } from '../../../src/render/html.js';
 import * as fs from 'node:fs/promises';
 
 vi.mock('node:fs/promises', () => ({

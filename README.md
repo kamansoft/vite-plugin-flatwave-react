@@ -1,13 +1,12 @@
 # vite-plugin-flatwave-react
 
-A Vite plugin for **Markdown‑driven, i18n‑aware static React sites**.  
-It scans Markdown files with front‑matter, builds a typed content index, exposes virtual modules for the client, generates locale‑prefixed static HTML, sitemap, robots.txt and route manifest, and provides a validation CLI. **New in v0.1: build-time pre-rendering (SSG) with full React component hydration.**
+A Vite plugin for **Markdown‑driven, i18n‑aware static React sites** with a **single render pipeline** for build-time SSR and client hydration/navigation.
 
-> **Note:** The package is prepared for npm publication as `vite-plugin-flatwave-react`. Until you publish it, use the local file dependency instructions below.
+It scans Markdown files with front‑matter, builds a typed content index, exposes virtual modules for the client, generates locale‑prefixed static HTML with full React pre-rendering and SEO metadata, provides a client-side render loop for SPA navigation, and includes a validation CLI.
 
 ---
 
-## Quick start (local development)
+## Quick Start (Local Development)
 
 ```bash
 # 1. Clone the repo
@@ -25,12 +24,12 @@ vite-plugin-flatwave-react/
 ├─ packages/vite-plugin-flatwave-react   # the reusable plugin
 ├─ examples/basic-react-site              # minimal React + Vite example
 ├─ docker/                               # Docker Compose for dev / build / static preview
-└─ e2e/                                  # Vitest end‑to‑end test
+└─ e2e/                                  # Vitest end-to-end test
 ```
 
 ---
 
-## Using the plugin in your own project (local file dependency)
+## Using the Plugin in Your Own Project (Local File Dependency)
 
 Until the package lands on npm, depend on the built plugin via a **file:** reference.
 
@@ -62,7 +61,7 @@ After the package is published, replace the `file:` dependency with:
 
 ---
 
-## Adding the plugin to a Vite + React project
+## Adding the Plugin to a Vite + React Project
 
 ```ts
 // vite.config.ts
@@ -82,7 +81,7 @@ export default defineConfig({
       componentsDir: path.resolve(__dirname, 'src/components'), // optional component validation
       sitemap: { hostname: 'https://example.com' },       // used for sitemap.xml & robots.txt
       
-      // NEW: Build-time pre-rendering (SSG) options
+      // Build-time pre-rendering (SSG) options
       prerender: true,                                     // enable SSG pre-rendering
       ssrEntry: 'src/entry-server.tsx',                   // custom SSR entry (optional)
     }),
@@ -90,7 +89,7 @@ export default defineConfig({
 });
 ```
 
-### SSG Pre-rendering Configuration
+### Pre-rendering Configuration
 
 ```ts
 // Full prerender options
@@ -146,19 +145,82 @@ Markdown body (GitHub‑flavoured, no MDX in v1)
 
 ---
 
+## Client-Side Render Loop (NEW in v0.1)
+
+The package exports a **single render pipeline** under `vite-plugin-flatwave-react/render-loop` that provides:
+
+- **Build-time SSR** via `createPrerenderer()` — generates complete static HTML with React component tree
+- **Client hydration & navigation** via `startRenderLoop()` — pathname routing, History API, manual scroll restoration
+- **SEO-complete initial HTML** — works without JavaScript, enhances on load
+
+### Client Entry (`main.tsx`)
+
+```tsx
+import { startRenderLoop } from 'vite-plugin-flatwave-react/render-loop';
+import { App } from './App';
+import './styles.css';
+
+startRenderLoop({
+  root: document.getElementById('root')!,
+  App,
+});
+```
+
+### App Component (`App.tsx`)
+
+```tsx
+import { useFlatwaveRoute } from 'vite-plugin-flatwave-react/render-loop';
+import { LanguageSwitcher } from './components/LanguageSwitcher';
+import { MarkdownRenderer } from './components/MarkdownRenderer';
+import { ProgramPage } from './components/ProgramPage';
+import { SimplePage } from './components/SimplePage';
+
+export function App({ pageContext }: { pageContext: { locale: string; content: any; route: any } }) {
+  const { content } = pageContext;
+
+  const Component = content.component === 'ProgramPage' ? ProgramPage : SimplePage;
+
+  return (
+    <main>
+      <LanguageSwitcher currentLocale={content.locale} contentId={content.id} />
+      <Component content={content} />
+      <MarkdownRenderer>{content.body}</MarkdownRenderer>
+    </main>
+  );
+}
+```
+
+### Runtime API
+
+```ts
+import {
+  startRenderLoop,      // Initialize render controller, hydrate #root
+  navigateTo,           // Imperative navigation
+  getCurrentPath,       // Get current route path
+  onNavigate,           // Subscribe to navigation events
+  getPageContext,       // Get current page context
+  useFlatwaveRoute,     // React hook for current route
+} from 'vite-plugin-flatwave-react/render-loop';
+```
+
+**Key behaviors:**
+- **Pathname routing only** — `/es/about`, `/pt/program` (no hash routing)
+- **No client data fetching** — uses serialized route inventory from virtual module
+- **Manual scroll restoration** — save before navigation, restore on back/forward
+- **Unknown route rejection** — no client 404, document unchanged
+- **Hydration** — `hydrateRoot` once, then `root.render()` for route changes
+
+---
+
 ## Build-time Pre-rendering (SSG)
 
-When `prerender: true` is enabled, the plugin performs a **two-step build** to generate fully pre-rendered static HTML with React component hydration.
-
-### How it works
+When `prerender: true` is enabled, the plugin performs a **two-step build** to generate fully pre-rendered static HTML:
 
 1. **Client build** (`vite build`) — produces client bundle and static assets
 2. **SSR build** (`vite build --ssr src/entry-server.tsx`) — produces server bundle  
 3. **Pre-render script** — loads SSR bundle, renders each route, writes static HTML
 
-### Example app setup
-
-**1. Create SSR entry** (`src/entry-server.tsx`):
+### SSR Entry (`src/entry-server.tsx`)
 
 ```tsx
 import { renderToString } from 'react-dom/server';
@@ -166,6 +228,9 @@ import { getRoutes, getContent } from 'virtual:flatwave/content';
 import type { FlatwaveRoute, FlatwaveContentEntry } from 'vite-plugin-flatwave-react/types';
 import { SimplePage } from './components/SimplePage';
 import { ProgramPage } from './components/ProgramPage';
+import MarkdownIt from 'markdown-it';
+
+const md = new MarkdownIt();
 
 interface PageContext {
   locale: string;
@@ -188,7 +253,7 @@ export async function render(url: string, pageContext: PageContext): Promise<str
   const componentRegistry = { ...components, ...passedComponents };
   const Component = componentRegistry[content.component] || SimplePage;
   
-  const bodyHtml = content.body; // or use markdown-it for SSR markdown rendering
+  const bodyHtml = md.render(content.body);
 
   const App = () => (
     <html lang={locale}>
@@ -217,7 +282,7 @@ function renderHtmlHead(route: FlatwaveRoute): string {
 }
 ```
 
-**2. Update `package.json` scripts**:
+### Package.json Scripts
 
 ```json
 {
@@ -230,21 +295,57 @@ function renderHtmlHead(route: FlatwaveRoute): string {
 }
 ```
 
-**3. Run the full pipeline**:
+### Pre-render Script (`scripts/prerender.mjs`)
+
+```js
+import { createPrerenderer } from 'vite-plugin-flatwave-react/render/server';
+import { buildIndex } from 'vite-plugin-flatwave-react/content/indexer';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(__dirname, '..');
+const distDir = path.resolve(projectRoot, 'dist');
+
+async function prerender() {
+  const options = {
+    contentDir: path.resolve(projectRoot, 'src/content'),
+    locales: ['es', 'pt'],
+    defaultLocale: 'es',
+    template: path.resolve(projectRoot, 'index.html'),
+    ssrEntry: path.resolve(projectRoot, 'dist-ssr/entry-server.js'),
+    prerender: true,
+  };
+
+  const index = await buildIndex(options);
+  const prerenderer = await createPrerenderer(options, index);
+  
+  const results = await prerenderer.prerender(distDir);
+  
+  for (const { path: fileName, html } of results) {
+    await mkdir(path.dirname(outputPath), { recursive: true });
+    await writeFile(outputPath, html);
+  }
+}
+
+prerender();
+```
+
+### Run the Full Pipeline
 
 ```bash
 npm run build      # client + SSR bundle
 npm run prerender  # generates pre-rendered HTML in dist/
 ```
 
-### Pre-rendered output
+### Pre-rendered Output
 
 Each route gets fully rendered HTML with:
 
 - ✅ Complete React component tree (no empty `<div id="root">`)
 - ✅ Markdown body rendered to HTML via `markdown-it`
 - ✅ All SEO metadata (title, description, canonical, hreflang, Open Graph, Twitter, JSON-LD)
-- ✅ Client-side hydration script for interactivity
+- ✅ Client-side hydration script with serialized page context
 - ✅ Per-locale output: `dist/{locale}/{route}/index.html`
 
 ```
@@ -267,7 +368,7 @@ dist/
 
 ---
 
-## Development workflow (monorepo)
+## Development Workflow (Monorepo)
 
 | Command | What it does |
 |---------|---------------|
@@ -283,7 +384,7 @@ All commands are defined in the **root `package.json`** (workspace scripts).
 
 ---
 
-## Running the React example locally (without Docker)
+## Running the React Example Locally (Without Docker)
 
 ```bash
 # 1️⃣ Build the plugin (once)
@@ -295,22 +396,22 @@ npm run dev -w @flatwave/example-basic-react-site
 ```
 
 The example demonstrates:
-
-* locale‑prefixed routes (`/es/`, `/pt/about`, …)  
-* browser language detection redirect from `/`  
-* `LanguageSwitcher` built from `getAlternatives()`  
-* `react-markdown` rendering via `MarkdownRenderer`  
-* SEO tags, `sitemap.xml`, `robots.txt`, `route-manifest.json` generated at build time
-* **NEW:** Build-time pre-rendering with full React hydration
+- locale‑prefixed routes (`/es/`, `/pt/about`, …)  
+- browser language detection redirect from `/`  
+- `LanguageSwitcher` built from `getAlternatives()`  
+- `react-markdown` rendering via `MarkdownRenderer`  
+- SEO tags, `sitemap.xml`, `robots.txt`, `route-manifest.json` generated at build time
+- **Build-time pre-rendering with full React hydration**
+- **Client-side navigation without full page reloads**
 
 ---
 
-## Docker‑based development & CI
+## Docker‑Based Development & CI
 
 The `docker/` folder contains a ready‑to‑run Compose stack.
 
 ```bash
-# Build images and start dev server (hot‑reload)
+# Build images and start dev server (hot-reload)
 docker compose -f docker/docker-compose.yml up dev
 
 # Build production artefacts (runs `npm run build` inside container)
@@ -334,7 +435,7 @@ The same stack is used by the **e2e test** (`npm run test:e2e`) to guarantee tha
 
 ---
 
-## Standalone validation CLI
+## Standalone Validation CLI
 
 After building the plugin you get a binary `flatwave-validate`.
 
@@ -343,7 +444,7 @@ node packages/vite-plugin-flatwave-react/dist/cli/validate.js \
   --content-dir examples/basic-react-site/src/content \
   --locales es,pt \
   --default-locale es \
-  --components-dir examples/basic-site/src/components \
+  --components-dir examples/basic-react-site/src/components \
   --strict-missing   # optional: turn missing‑locale warnings into errors
 ```
 
@@ -354,20 +455,25 @@ The CLI re‑uses the exact same validator the Vite plugin runs at `buildStart`,
 
 ---
 
-## Project structure recap
+## Project Structure Recap
 
 ```
 vite-plugin-flatwave-react/
 ├─ packages/vite-plugin-flatwave-react/
 │   ├─ src/
 │   │   ├─ index.ts                 # main plugin factory
-│   │   ├─ content/                 # scanner, parser, validator, route builder
-│   │   ├─ seo/metadata.ts          # HTML head helpers
-│   │   ├─ react/index.ts           # React hooks (useFlatwaveContent, …)
-│   │   ├─ prerender/               # SSG pre-rendering module
-│   │   │   ├─ index.ts             # createPrerenderer + plugin
-│   │   │   ├─ renderer.ts          # SSR rendering wrapper + route filtering
-│   │   │   └─ template.ts          # HTML template handling
+│   │   ├─ content/                 # scanner, parser, validator, route builder, indexer
+│   │   ├─ seo/                     # SEO metadata helpers
+│   │   ├─ react/                   # React hooks over virtual content
+│   │   ├─ render/                  # SINGLE render pipeline
+│   │   │   ├─ types.ts             # RenderMode, SerializedPageContext, RenderControllerOptions
+│   │   │   ├─ page.ts              # Pure route/content resolution
+│   │   │   ├─ html.ts              # Template, assets, shell rendering, page-context injection
+│   │   │   ├─ server.tsx           # SSR adapter: createPrerenderer(), component registry
+│   │   │   ├─ client.tsx           # Browser adapter: startRenderLoop()
+│   │   │   ├─ controller.tsx       # RenderController: owns hydration, navigation, head updates
+│   │   │   ├─ navigation.ts        # Link interception, History API routing
+│   │   │   └─ scroll-manager.ts    # Manual scroll save/restore
 │   │   ├─ cli/validate.ts          # flatwave-validate entry point
 │   │   └─ virtual.d.ts             # TypeScript declarations for virtual modules
 │   ├─ templates/
@@ -379,20 +485,21 @@ vite-plugin-flatwave-react/
 │   │   ├─ content/{es,pt}/*.md
 │   │   ├─ components/*.tsx
 │   │   ├─ entry-server.tsx         # SSR entry for SSG
-│   │   ├─ App.tsx / main.tsx
+│   │   ├─ App.tsx / main.tsx       # render-loop integration
 │   │   └─ styles.css
-│   ├─ scripts/prerender.mjs        # pre-render script
+│   ├─ scripts/prerender.mjs        # pre-render script using createPrerenderer()
 │   ├─ vite.config.ts
 │   └─ package.json
 ├─ docker/                           # Compose + Dockerfiles + nginx
-├─ e2e/example.test.ts              # Vitest end‑to‑end suite
+├─ e2e/example.test.ts              # Vitest end-to-end suite
 ├─ docs/
 │   └─ ARCHITECTURE.md              # architecture documentation
 └─ package.json                      # root workspace + helper scripts
 ```
+
 ---
 
-## Contributing / extending
+## Contributing / Extending
 
 1. **Add a new locale** – drop a folder under `src/content/<locale>/` and add the locale to `locales` in `vite.config.ts`.  
 2. **New component** – create `src/components/MyComponent.tsx`, reference it in front‑matter (`component: "MyComponent"`).  
