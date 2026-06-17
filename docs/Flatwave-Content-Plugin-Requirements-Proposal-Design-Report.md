@@ -140,7 +140,7 @@ Current i18n stack:
 Current detection order:
 
 ```ts
-['path', 'localStorage', 'navigator', 'htmlTag']
+['path', 'localStorage', 'navigator', 'htmlTag'];
 ```
 
 Reference: `current-working-project-with-features/src/config/i18n.ts:38`.
@@ -249,6 +249,7 @@ References:
 ### 4.2 Markdown and Frontmatter
 
 Recommended behavior:
+
 - Parse Markdown with `gray-matter`.
 - Separate metadata from body.
 - Keep raw Markdown body available.
@@ -275,6 +276,7 @@ import { getContent, getRoutes, getAlternatives } from 'virtual:flatwave/content
 ### 4.3 i18n Strategy
 
 Recommended locale strategy:
+
 - Use URL prefixes for every locale, including the default locale: `/{locale}/...`.
 - The default locale route is `/es/...` when `defaultLocale: 'es'`; do not generate an unprefixed default route in v1.
 - Keep every locale URL static and crawlable.
@@ -290,6 +292,7 @@ Recommended locale strategy:
 ### 4.4 SSG Strategy
 
 Recommended SSG boundary:
+
 - The plugin generates a route inventory:
   - route path
   - locale
@@ -302,6 +305,7 @@ Recommended SSG boundary:
 - The v1 default adapter is Vike and should be documented as the supported path for the example app.
 
 Research summary:
+
 - **Vike** is the current name for `vite-plugin-ssr` and provides a mature Vite-native SSR/SSG model, route configuration, prerendering, head metadata support, and i18n documentation. It is more framework-like than a small plugin, but it directly solves static pre-rendering for Vite apps.
 - **`vite-react-ssg` / `vite-plugin-react-ssg`** is React-specific and works well with React Router v6 route trees, `getStaticPaths`, build-time loaders, document head management, critical CSS, and custom route inclusion hooks. Its README notes that React Router v7 has built-in SSG support and recommends using that official capability for React Router v7 users.
 - **Custom Vite SSG** uses Vite's documented SSR APIs, including `ssrLoadModule`, `renderToString`, and static HTML writing. It gives maximum control over localized rendering, metadata injection, sitemap generation, and output shape, but it requires maintaining a small framework inside the plugin or example app.
@@ -309,18 +313,20 @@ Research summary:
 
 Comparison matrix:
 
-| Option | Best fit | Strengths | Weaknesses | Fit for this plugin |
-| --- | --- | --- | --- | --- |
-| Vike | Full Vite-native SSR/SSG with routing and prerendering | Mature Vite integration; built-in prerendering; routing and head metadata support; i18n guidance; static output for deployable HTML | More framework-like; app may need to adopt Vike route conventions; can constrain the example app architecture | Strong default if the project is willing to adopt Vike conventions for the example app |
-| `vite-react-ssg` | React Router v6 apps that already define routes in code | React-focused; supports `getStaticPaths`, build-time loaders, document head, critical CSS, and route inclusion hooks; simple for route-tree apps | Less aligned with Markdown/file-system route inventory; depends on React Router v6 conventions; React Router v7 users should prefer React Router's own SSG | Good fallback for React Router v6, but not the best primary adapter for a Markdown-driven content inventory |
-| Custom Vite SSG | Maximum control over Markdown/i18n/SEO output | Can consume the plugin's route inventory directly; can write exact locale-prefixed HTML files, localized metadata, sitemap, and robots output; avoids imposing a routing framework | Highest maintenance burden; must handle SSR setup, hydration scripts, asset injection, concurrency, and edge cases | Best technical fit for the plugin boundary, but should be an advanced or internal adapter rather than the first public default |
+| Option           | Best fit                                                | Strengths                                                                                                                                                                          | Weaknesses                                                                                                                                                 | Fit for this plugin                                                                                                            |
+| ---------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Vike             | Full Vite-native SSR/SSG with routing and prerendering  | Mature Vite integration; built-in prerendering; routing and head metadata support; i18n guidance; static output for deployable HTML                                                | More framework-like; app may need to adopt Vike route conventions; can constrain the example app architecture                                              | Strong default if the project is willing to adopt Vike conventions for the example app                                         |
+| `vite-react-ssg` | React Router v6 apps that already define routes in code | React-focused; supports `getStaticPaths`, build-time loaders, document head, critical CSS, and route inclusion hooks; simple for route-tree apps                                   | Less aligned with Markdown/file-system route inventory; depends on React Router v6 conventions; React Router v7 users should prefer React Router's own SSG | Good fallback for React Router v6, but not the best primary adapter for a Markdown-driven content inventory                    |
+| Custom Vite SSG  | Maximum control over Markdown/i18n/SEO output           | Can consume the plugin's route inventory directly; can write exact locale-prefixed HTML files, localized metadata, sitemap, and robots output; avoids imposing a routing framework | Highest maintenance burden; must handle SSR setup, hydration scripts, asset injection, concurrency, and edge cases                                         | Best technical fit for the plugin boundary, but should be an advanced or internal adapter rather than the first public default |
 
 Recommended default:
+
 - Use **Vike** as the documented default SSG adapter for v1 because it is the most mature Vite-native SSR/SSG option, has explicit prerendering and i18n guidance, and can render every locale-prefixed route as static HTML.
 - Keep the plugin's route inventory adapter-neutral so a future React Router v6 `vite-react-ssg` adapter or custom Vite SSG adapter can be added without changing the core content model.
 - Treat custom Vite SSG as an advanced integration path for teams that need exact control over output shape, metadata injection, or non-Vike routing conventions.
 
 Default adapter responsibilities:
+
 1. Import the plugin route inventory.
 2. Render each route with the correct locale and content variant.
 3. Inject localized `<title>`, `<meta>`, canonical, `hreflang`, Open Graph, Twitter, JSON-LD, and `<html lang>` values.
@@ -618,8 +624,8 @@ The plugin should expose route metadata like:
     path: '/pt/isto-sobre-nos',
     contentId: 'acerca-de-nosotros',
     component: 'SimplePage',
-  }
-]
+  },
+];
 ```
 
 The SSG adapter should:
@@ -631,6 +637,7 @@ The SSG adapter should:
 5. Generate sitemap and `robots.txt` from the same route inventory.
 
 Default adapter recommendation:
+
 - Use **Vike** for the documented v1 adapter path because it provides the most complete Vite-native SSR/SSG, prerendering, routing, and i18n support.
 - Keep `vite-react-ssg` and custom Vite SSG as secondary integration patterns rather than the default.
 
@@ -639,16 +646,16 @@ Default adapter recommendation:
 Recommended frontmatter SEO fields:
 
 ```yaml
-title: "Acerca de Notostros"
-description: "Radio social experimental..."
-canonical: "/es/acerca-de-nosotros"
-image: "/images/og.jpg"
-robots: "index, follow"
+title: 'Acerca de Notostros'
+description: 'Radio social experimental...'
+canonical: '/es/acerca-de-nosotros'
+image: '/images/og.jpg'
+robots: 'index, follow'
 keywords:
   - radio
   - cultura
 jsonLd:
-  "@type": "WebPage"
+  '@type': 'WebPage'
 ```
 
 Generated tags should include:
@@ -712,6 +719,7 @@ The example app should demonstrate:
 The first implementation step should create Docker infrastructure and configuration for an example React + Vite static site used to test the plugin in an isolated environment.
 
 Recommended Docker setup:
+
 - `docker-compose.yml` for local development and build verification.
 - A dev service that starts the example Vite dev server.
 - A build service that runs the static build and writes the output directory.
@@ -753,6 +761,7 @@ examples/basic-react-site/
 ```
 
 Docker acceptance checks:
+
 - The dev service can start the example app with the local plugin linked.
 - The build service can produce the static output directory.
 - The static server serves locale-prefixed HTML routes such as `/es/acerca-de-nosotros`.
@@ -810,15 +819,15 @@ The plugin planning is complete when:
 
 ## 10. Risks and Trade-Offs
 
-| Risk | Impact | Mitigation |
-| --- | --- | --- |
-| Vike as default adapter | Can lock the example app into Vike conventions | Keep route inventory generic; document adapter boundary; keep secondary integration patterns |
-| Custom SSG maintenance | Correct output shape requires handling SSR, hydration, assets, and concurrency | Treat custom Vite SSG as advanced/internal until needed |
-| Markdown HTML safety | Markdown HTML can introduce XSS | Use safe renderer defaults and optional sanitization |
-| Large content sets | Slow builds and large bundles | Add caching, per-locale splitting, and route partitioning |
-| Runtime language detection | Can harm SEO if used incorrectly | Use only for redirects from `/`, never same-URL content switching |
-| Duplicate validation logic | Divergent rules and confusing errors | Make plugin validation canonical and expose the same rules through CLI |
-| Bundle size | All locales may be bundled | Support per-locale chunks or dynamic imports |
+| Risk                       | Impact                                                                         | Mitigation                                                                                   |
+| -------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| Vike as default adapter    | Can lock the example app into Vike conventions                                 | Keep route inventory generic; document adapter boundary; keep secondary integration patterns |
+| Custom SSG maintenance     | Correct output shape requires handling SSR, hydration, assets, and concurrency | Treat custom Vite SSG as advanced/internal until needed                                      |
+| Markdown HTML safety       | Markdown HTML can introduce XSS                                                | Use safe renderer defaults and optional sanitization                                         |
+| Large content sets         | Slow builds and large bundles                                                  | Add caching, per-locale splitting, and route partitioning                                    |
+| Runtime language detection | Can harm SEO if used incorrectly                                               | Use only for redirects from `/`, never same-URL content switching                            |
+| Duplicate validation logic | Divergent rules and confusing errors                                           | Make plugin validation canonical and expose the same rules through CLI                       |
+| Bundle size                | All locales may be bundled                                                     | Support per-locale chunks or dynamic imports                                                 |
 
 ---
 

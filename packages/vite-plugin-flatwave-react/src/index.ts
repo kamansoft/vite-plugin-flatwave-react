@@ -5,7 +5,7 @@ import { validateContent } from './content/validator.js';
 import { parseMarkdown } from './content/parser.js';
 import { routeForLocaleSlug } from './content/scanner.js';
 import { escapeHtml, escapeXml, renderHtmlHead } from './seo/metadata.js';
-import type { FlatwaveContentEntry, FlatwaveContentIndex, FlatwaveContentOptions, FlatwaveRoute } from './types';
+import type { FlatwaveContentIndex, FlatwaveContentOptions, FlatwaveRoute } from './types';
 
 const VIRTUAL_ID = '\0virtual:flatwave/content';
 const PUBLIC_VIRTUAL_ID = 'virtual:flatwave/content';
@@ -52,21 +52,27 @@ export function flatwaveContent(options: FlatwaveContentOptions): Plugin[] {
         if (!id.endsWith('.md')) return null;
         const source = await readFile(id);
         const parsed = parseMarkdown(source);
-        const locale = inferLocale(id, normalizedOptions.contentDir, normalizedOptions.locales) ?? normalizedOptions.defaultLocale;
+        const locale =
+          inferLocale(id, normalizedOptions.contentDir, normalizedOptions.locales) ??
+          normalizedOptions.defaultLocale;
         const slug = path.basename(id, '.md');
         const route = routeForLocaleSlug(locale, slug);
         const idValue = slug;
 
-        return `export default ${JSON.stringify({
-          body: parsed.body,
-          attributes: parsed.attributes,
-          frontmatter: parsed.frontmatter,
-          locale,
-          slug,
-          id: idValue,
-          route,
-          file: id,
-        }, null, 2)};`;
+        return `export default ${JSON.stringify(
+          {
+            body: parsed.body,
+            attributes: parsed.attributes,
+            frontmatter: parsed.frontmatter,
+            locale,
+            slug,
+            id: idValue,
+            route,
+            file: id,
+          },
+          null,
+          2
+        )};`;
       },
     },
     {
@@ -88,7 +94,10 @@ export function flatwaveContent(options: FlatwaveContentOptions): Plugin[] {
           this.emitFile({
             type: 'asset',
             fileName: 'sitemap.xml',
-            source: renderSitemap(routes, normalizedOptions.sitemap?.hostname ?? 'http://localhost:4173'),
+            source: renderSitemap(
+              routes,
+              normalizedOptions.sitemap?.hostname ?? 'http://localhost:4173'
+            ),
           });
         }
 
@@ -186,7 +195,13 @@ function inferLocale(file: string, contentDir: string, locales: string[]): strin
 
 function findIndexHtml(bundle: Record<string, unknown>): string | undefined {
   for (const item of Object.values(bundle)) {
-    if (item && typeof item === 'object' && 'fileName' in item && item.fileName === 'index.html' && 'source' in item) {
+    if (
+      item &&
+      typeof item === 'object' &&
+      'fileName' in item &&
+      item.fileName === 'index.html' &&
+      'source' in item
+    ) {
       return String((item as { source?: unknown }).source);
     }
   }
@@ -195,8 +210,12 @@ function findIndexHtml(bundle: Record<string, unknown>): string | undefined {
 
 function extractAssets(html: string | undefined): { scripts: string[]; styles: string[] } {
   if (!html) return { scripts: [], styles: [] };
-  const scripts = [...html.matchAll(/<script[^>]+src="([^"]+\.js)"[^>]*>/g)].map((match) => match[1]);
-  const styles = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+\.css)"[^>]*>/g)].map((match) => match[1]);
+  const scripts = [...html.matchAll(/<script[^>]+src="([^"]+\.js)"[^>]*>/g)].map(
+    (match) => match[1]
+  );
+  const styles = [
+    ...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+\.css)"[^>]*>/g),
+  ].map((match) => match[1]);
   return { scripts, styles };
 }
 
@@ -223,9 +242,16 @@ Sitemap: ${base}/sitemap.xml
 `;
 }
 
-function renderRouteHtml(route: FlatwaveRoute, assets: { scripts: string[]; styles: string[] }): string {
-  const scripts = assets.scripts.map((src) => `<script type="module" crossorigin src="${escapeHtml(src)}"></script>`).join('\n');
-  const styles = assets.styles.map((href) => `<link rel="stylesheet" href="${escapeHtml(href)}">`).join('\n');
+function renderRouteHtml(
+  route: FlatwaveRoute,
+  assets: { scripts: string[]; styles: string[] }
+): string {
+  const scripts = assets.scripts
+    .map((src) => `<script type="module" crossorigin src="${escapeHtml(src)}"></script>`)
+    .join('\n');
+  const styles = assets.styles
+    .map((href) => `<link rel="stylesheet" href="${escapeHtml(href)}">`)
+    .join('\n');
   const title = escapeHtml(route.metadata.title);
   const description = route.metadata.description ? escapeHtml(route.metadata.description) : title;
 

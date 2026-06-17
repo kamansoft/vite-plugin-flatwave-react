@@ -1,6 +1,7 @@
 # 2026-06-16 18:57 -05 — publish-to-npm — implement semantic-release + OIDC
 
 ## What was done
+
 - Created and switched to branch `feat/publish-to-npm` (off `main`, which is not pushable);
   the uncommitted `dev-notes/` artifacts carried over.
 - Resolved risk **R1** via research (semantic-release npm plugin README, npm trusted-publishing
@@ -10,6 +11,7 @@
 - Implemented the release pipeline (code changes below).
 
 ## Files created / modified / deleted
+
 - **Created** `.releaserc.json` (repo root): branches `main`; plugins commit-analyzer,
   release-notes-generator, npm (`pkgRoot: packages/vite-plugin-flatwave-react`), github.
 - **Modified** `package.json` (root): added `semantic-release: ^25.0.0` devDependency and a
@@ -25,6 +27,7 @@
   implementation decisions to the plan.
 
 ## Why / key decisions
+
 - **No write-back to `main`** (dropped `@semantic-release/git` + committed `CHANGELOG.md`):
   `main` is not pushable, and semantic-release recommends tags + GitHub Releases as the source
   of truth rather than committing the version bump back. This also keeps the dependency
@@ -33,11 +36,13 @@
   `.npmrc` that conflicts with semantic-release's OIDC auth (`EINVALIDNPMTOKEN`).
 
 ## Deviations from plan
+
 - Plan §Approach originally listed `@semantic-release/changelog` + `@semantic-release/git` and a
   committed `CHANGELOG.md`; dropped per the no-write-back decision above. Recorded in the plan's
   "Implementation decisions" section.
 
 ## State
+
 - **In progress.** Next: `npm install` to update `package-lock.json`, then validate
   (`build:plugin`, `npm pack --dry-run`, `semantic-release --dry-run`).
 - **Manual (registry-side) steps still required** before automation can publish — see upcoming

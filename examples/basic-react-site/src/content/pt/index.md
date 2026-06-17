@@ -1,16 +1,16 @@
 ---
-title: "Início"
-slug: "index"
-id: "home"
-component: "SimplePage"
+title: 'Início'
+slug: 'index'
+id: 'home'
+component: 'SimplePage'
 public: true
-description: "Página inicial do exemplo Flatwave."
-canonical: "/pt/"
-robots: "index, follow"
+description: 'Página inicial do exemplo Flatwave.'
+canonical: '/pt/'
+robots: 'index, follow'
 keywords:
   - flatwave
   - exemplo
-menu: "main"
+menu: 'main'
 menu_position: 1
 ---
 

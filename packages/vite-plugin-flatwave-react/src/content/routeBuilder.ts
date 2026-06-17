@@ -1,5 +1,10 @@
-import type { FlatwaveContentEntry, FlatwaveFrontmatter, FlatwaveRoute, SeoMetadata } from '../types';
-import { isPublicEntry, normalizeSlug, routeForLocaleSlug } from './scanner.js';
+import type {
+  FlatwaveContentEntry,
+  FlatwaveFrontmatter,
+  FlatwaveRoute,
+  SeoMetadata,
+} from '../types';
+import { isPublicEntry, normalizeSlug } from './scanner.js';
 
 export function buildContentIndex(entries: FlatwaveContentEntry[]): {
   entries: FlatwaveContentEntry[];
@@ -50,7 +55,10 @@ export function buildContentIndex(entries: FlatwaveContentEntry[]): {
   };
 }
 
-function buildAlternatives(locales: string[], getRoute: (locale: string) => string): Record<string, string> {
+function buildAlternatives(
+  locales: string[],
+  getRoute: (locale: string) => string
+): Record<string, string> {
   const alternatives: Record<string, string> = {};
   for (const locale of locales) {
     const route = getRoute(locale);
@@ -59,7 +67,11 @@ function buildAlternatives(locales: string[], getRoute: (locale: string) => stri
   return alternatives;
 }
 
-function buildSeoMetadata(frontmatter: FlatwaveFrontmatter, route: string, locale: string): SeoMetadata {
+function buildSeoMetadata(
+  frontmatter: FlatwaveFrontmatter,
+  route: string,
+  _locale: string
+): SeoMetadata {
   return {
     title: String(frontmatter.title || ''),
     description: frontmatter.description ? String(frontmatter.description) : undefined,

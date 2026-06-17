@@ -7,7 +7,7 @@
 
 ## Goal
 
-Replace the current *patch-only + token* release path with an automated release that, on
+Replace the current _patch-only + token_ release path with an automated release that, on
 merge to `main`, derives the next version from **Conventional Commits**, publishes
 `vite-plugin-flatwave-react` to npm (public, with provenance) using **OIDC Trusted
 Publishing** (no `NPM_TOKEN`), and produces a tag, GitHub Release, and changelog. Satisfies
@@ -24,6 +24,7 @@ merge to `main` → npm updates" most directly, and its `@semantic-release/npm` 
 supports `--provenance`.
 
 Recommended plugin chain (all first-party):
+
 - `@semantic-release/commit-analyzer` — commits → bump level
 - `@semantic-release/release-notes-generator` — changelog text
 - `@semantic-release/changelog` — write `CHANGELOG.md`
@@ -50,6 +51,7 @@ PR is merged, not on every feature merge.
 ### First-publish bootstrap (FR8 / R2)
 
 Because trusted publishing typically needs the package to exist:
+
 1. One-time publish of the initial version to claim the name (either a manual local
    `npm publish --access public`, or a single CI run using a temporary token).
 2. Configure the trusted publisher on npm.
@@ -101,6 +103,7 @@ Because trusted publishing typically needs the package to exist:
   slightly (direct pushes to `main` also release). Acceptable given no branch protection; revisit if protection is added.
 - **Permissions:** `@semantic-release/git` pushing changelog back to `main` must be allowed
   by repo Actions settings; if disallowed, drop the git plugin and let npm/tag be the source of truth.
+
 ```mermaid
 flowchart LR
   Merge([PR merged to main]) --> CI["release.yml on push:main"]
@@ -111,14 +114,18 @@ flowchart LR
   Build --> Publish["npm publish via OIDC<br/>+ provenance"]
   Publish --> Release["tag vX.Y.Z + GitHub Release + CHANGELOG"]
 ```
+
 ## Implementation decisions (finalized 2026-06-16, during implementation)
+
 - **R1 RESOLVED:** tokenless OIDC works with `semantic-release@^25` (bundles OIDC-capable `@semantic-release/npm@^13.1`). v24/v12 hard-fails (`ENONPMTOKEN`/`EINVALIDNPMTOKEN`) without a token.
 - **No write-back to `main`:** dropped `@semantic-release/git` and a committed `CHANGELOG.md`. `main` is not pushable, and the semantic-release maintainers recommend against committing the version back. The changelog lives in **GitHub Releases**; git **tags** are the version source of truth.
 - **Final plugin chain:** `commit-analyzer`, `release-notes-generator`, `npm` (with `pkgRoot: packages/vite-plugin-flatwave-react`), `github` — all bundled with semantic-release core, so the only new dependency is `semantic-release` itself (root devDependency).
 - **Config location:** `.releaserc.json` at the **repo root**; `npx semantic-release` runs at root (correct for git history/tags) and publishes the subdir package via `pkgRoot`.
 - **Workflow:** trigger `push: main` (PR merges fire this) + `workflow_dispatch`; Node 24 (npm ≥ 11.5.1); **no `registry-url`** in `setup-node`; no `NPM_TOKEN`; `id-token: write`.
 - **First-release baseline:** to stay on 0.x, the bootstrap creates tag `v0.1.0`; otherwise semantic-release's first release defaults to `1.0.0`.
+
 ## Local execution via nvm (chosen 2026-06-16)
+
 - **Decision:** local one-time/rare manual publish + local dry-run run on the host via a momentary `nvm use 24` (Node ≥ 22.14, npm ≥ 11.5.1); the default Node is unchanged and nothing is installed globally. CI release stays **native** on the GitHub Actions runner.
 - **Docker evaluated and rejected:** a `release` compose service was prototyped, but running semantic-release in the container failed with `ENOGITREPO` — git ran as root over the host-owned bind mount (dubious-ownership), not a worktree issue. nvm avoids this and is simpler; the Docker `release` service + `release.Dockerfile` were removed.
 - **Scripts:** `dev-notes/publish-to-npm/scripts/dry-run-release.sh` (preview) and `local-publish.sh` (one-time/rare publish; `--dry-run` packs instead). Both `nvm use 24` momentarily.
