@@ -5,8 +5,8 @@ import { validateContent } from './content/validator.js';
 import { parseMarkdown } from './content/parser.js';
 import { routeForLocaleSlug } from './content/scanner.js';
 import { escapeHtml, escapeXml, renderHtmlHead } from './seo/metadata.js';
-import { createPrerenderPlugin } from './prerender/index.js';
-import type { FlatwaveContentEntry, FlatwaveContentIndex, FlatwaveContentOptions, FlatwaveRoute, NormalizedOptions } from './types';
+import { createPrerenderer, loadTemplate, extractAssets, injectPreRenderedHtml, injectPageContextScript, renderRouteHtml } from './render/server.js';
+import type { FlatwaveContentEntry, FlatwaveContentIndex, FlatwaveContentOptions, FlatwaveRoute, NormalizedOptions, PrerenderOptions } from './types';
 
 const VIRTUAL_ID = '\0virtual:flatwave/content';
 const PUBLIC_VIRTUAL_ID = 'virtual:flatwave/content';
@@ -119,10 +119,54 @@ export async function flatwaveContent(options: FlatwaveContentOptions): Promise<
   return [contentPlugin, markdownPlugin, ssgPlugin, prerenderPlugin];
 }
 
+export async function createPrerenderPlugin(
+  options: NormalizedOptions,
+  index: FlatwaveContentIndex
+): Promise<Plugin> {
+  const prerenderOptions = normalizePrerenderOptions(options.prerender);
+  
+  if (!prerenderOptions) {
+    return {
+      name: 'flatwave-react:prerender',
+      enforce: 'post',
+    };
+  }
+
+  // Skip built-in prerender if ssrEntry is a TypeScript file (needs separate SSR build first)
+  const ssrEntry = options.ssrEntry || '';
+  const skipBuiltinPrerender = ssrEntry.endsWith('.tsx') || ssrEntry.endsWith('.ts');
+
+  return {
+    name: 'flatwave-react:prerender',
+    enforce: 'post',
+    async generateBundle(_, bundle) {
+      if (skipBuiltinPrerender) {
+        return;
+      }
+      
+      const prerenderer = await createPrerenderer(options, index);
+      const outputDir = process.cwd() + '/dist';
+      const results = await prerenderer.prerender(outputDir);
+      
+      for (const { path: fileName, html } of results) {
+        this.emitFile({
+          type: 'asset',
+          fileName,
+          source: html,
+        });
+      }
+    },
+  };
+}
+
 function normalizeOptions(options: FlatwaveContentOptions): NormalizedOptions {
   if (!options.locales.includes(options.defaultLocale)) {
     throw new Error(`defaultLocale '${options.defaultLocale}' must be included in locales.`);
   }
+
+  const renderLoop = options.renderLoop === undefined && options.prerender
+    ? { enabled: true }
+    : options.renderLoop;
 
   return {
     ...options,
@@ -135,6 +179,7 @@ function normalizeOptions(options: FlatwaveContentOptions): NormalizedOptions {
     template: options.template,
     prerender: options.prerender,
     ssrEntry: options.ssrEntry,
+    renderLoop,
   };
 }
 
@@ -203,13 +248,6 @@ function findIndexHtml(bundle: Record<string, unknown>): string | undefined {
   return undefined;
 }
 
-function extractAssets(html: string | undefined): { scripts: string[]; styles: string[] } {
-  if (!html) return { scripts: [], styles: [] };
-  const scripts = [...html.matchAll(/<script[^>]+src="([^"]+\.js)"[^>]*>/g)].map((match) => match[1]);
-  const styles = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+\.css)"[^>]*>/g)].map((match) => match[1]);
-  return { scripts, styles };
-}
-
 function renderSitemap(routes: FlatwaveRoute[], hostname: string): string {
   const base = hostname.replace(/\/$/, '');
   const urls = routes
@@ -233,29 +271,10 @@ Sitemap: ${base}/sitemap.xml
 `;
 }
 
-function renderRouteHtml(route: FlatwaveRoute, assets: { scripts: string[]; styles: string[] }): string {
-  const scripts = assets.scripts.map((src) => `<script type="module" crossorigin src="${escapeHtml(src)}"></script>`).join('\n');
-  const styles = assets.styles.map((href) => `<link rel="stylesheet" href="${escapeHtml(href)}">`).join('\n');
-  const title = escapeHtml(route.metadata.title);
-  const description = route.metadata.description ? escapeHtml(route.metadata.description) : title;
-
-  return `<!doctype html>
-<html lang="${escapeHtml(route.locale)}">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title}</title>
-  <meta name="description" content="${description}">
-  <link rel="canonical" href="${escapeHtml(route.metadata.canonical ?? route.path)}">
-  ${styles}
-  ${renderHtmlHead(route)}
-</head>
-<body>
-  <div id="root"></div>
-  ${scripts}
-</body>
-</html>
-`;
+function normalizePrerenderOptions(prerender: NormalizedOptions['prerender']): PrerenderOptions | true | false | undefined {
+  if (!prerender) return undefined;
+  if (prerender === true) return {};
+  return prerender;
 }
 
 export default flatwaveContent;

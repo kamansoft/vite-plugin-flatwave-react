@@ -1,10 +1,8 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { startRenderLoop } from 'vite-plugin-flatwave-react/render-loop';
 import { App } from './App';
 import './styles.css';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+startRenderLoop({
+  root: document.getElementById('root')!,
+  App,
+});

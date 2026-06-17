@@ -39,3 +39,35 @@ declare module 'virtual:flatwave/content' {
     routes: FlatwaveVirtualRoute[];
   };
 }
+
+declare module 'vite-plugin-flatwave-react/render-loop' {
+  export interface SerializedPageContext {
+    locale: string;
+    route: import('./types').FlatwaveRoute;
+    content: import('./types').FlatwaveContentEntry;
+  }
+
+  export interface RenderControllerOptions {
+    root: Element;
+    App: React.ComponentType<{ pageContext: SerializedPageContext }>;
+    basePath?: string;
+    scrollToTop?: boolean;
+  }
+
+  export interface StartRenderLoopOptions extends RenderControllerOptions {}
+
+  export interface RenderController {
+    getCurrentPath(): string;
+    getCurrentPageContext(): SerializedPageContext | null;
+    destroy(): void;
+  }
+
+  export function startRenderLoop(options: StartRenderLoopOptions): RenderController;
+  export function destroyRenderLoop(): void;
+  export function getRenderController(): RenderController | null;
+  export function getCurrentPath(): string;
+  export function navigateTo(path: string): void;
+  export function onNavigate(callback: (path: string) => void): () => void;
+  export function getPageContext(): SerializedPageContext | null;
+  export function useFlatwaveRoute(): import('./types').FlatwaveRoute | undefined;
+}

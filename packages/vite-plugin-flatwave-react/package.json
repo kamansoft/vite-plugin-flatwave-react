@@ -25,6 +25,22 @@
     "./types": {
       "types": "./dist/types.d.ts"
     },
+    "./render-loop": {
+      "types": "./dist/render/client.d.ts",
+      "import": "./dist/render/client.js"
+    },
+    "./render": {
+      "types": "./dist/render/index.d.ts",
+      "import": "./dist/render/index.js"
+    },
+    "./render/server": {
+      "types": "./dist/render/server-entry.d.ts",
+      "import": "./dist/render/server-entry.js"
+    },
+    "./content/indexer": {
+      "types": "./dist/content/indexer.d.ts",
+      "import": "./dist/content/indexer.js"
+    },
     "./virtual": {
       "types": "./dist/react/virtual.d.ts"
     },

@@ -15,6 +15,11 @@ export interface PrerenderOptions {
     stream?: boolean;
     template?: string;
 }
+export interface RenderLoopOptions {
+    enabled?: boolean;
+    basePath?: string;
+    scrollToTop?: boolean;
+}
 export interface FlatwaveContentOptions {
     contentDir: string;
     locales: string[];
@@ -32,6 +37,7 @@ export interface FlatwaveContentOptions {
     template?: string;
     prerender?: boolean | PrerenderOptions;
     ssrEntry?: string;
+    renderLoop?: boolean | RenderLoopOptions;
 }
 export interface FlatwaveFrontmatter extends Record<string, unknown> {
     title: string;
@@ -73,6 +79,34 @@ export interface FlatwaveRoute {
     frontmatter: FlatwaveFrontmatter;
     alternatives: Record<string, string>;
 }
+export interface FlatwaveVirtualRoute {
+    locale: string;
+    path: string;
+    contentId: string;
+    component?: string;
+    metadata: Record<string, unknown>;
+    frontmatter: Record<string, unknown>;
+    alternatives: Record<string, string>;
+}
+export interface FlatwaveVirtualContent {
+    id: string;
+    locale: string;
+    slug: string;
+    path: string;
+    file: string;
+    component?: string;
+    public: boolean;
+    attributes: Record<string, unknown>;
+    frontmatter: Record<string, unknown>;
+    body: string;
+    route: string;
+    alternatives: Record<string, string>;
+}
+export interface SerializedPageContext {
+    locale: string;
+    route: FlatwaveRoute;
+    content: FlatwaveContentEntry;
+}
 export interface FlatwaveContentIndex {
     entries: FlatwaveContentEntry[];
     byId: Record<string, Record<string, FlatwaveContentEntry>>;
@@ -111,4 +145,5 @@ export interface NormalizedOptions {
     template?: string;
     prerender?: PrerenderOptions | true | false;
     ssrEntry?: string;
+    renderLoop?: RenderLoopOptions | true | false;
 }
