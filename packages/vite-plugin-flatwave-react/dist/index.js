@@ -52,7 +52,8 @@ export function flatwaveContent(options) {
                     return null;
                 const source = await readFile(id);
                 const parsed = parseMarkdown(source);
-                const locale = inferLocale(id, normalizedOptions.contentDir, normalizedOptions.locales) ?? normalizedOptions.defaultLocale;
+                const locale = inferLocale(id, normalizedOptions.contentDir, normalizedOptions.locales) ??
+                    normalizedOptions.defaultLocale;
                 const slug = path.basename(id, '.md');
                 const route = routeForLocaleSlug(locale, slug);
                 const idValue = slug;
@@ -175,7 +176,11 @@ function inferLocale(file, contentDir, locales) {
 }
 function findIndexHtml(bundle) {
     for (const item of Object.values(bundle)) {
-        if (item && typeof item === 'object' && 'fileName' in item && item.fileName === 'index.html' && 'source' in item) {
+        if (item &&
+            typeof item === 'object' &&
+            'fileName' in item &&
+            item.fileName === 'index.html' &&
+            'source' in item) {
             return String(item.source);
         }
     }
@@ -185,7 +190,9 @@ function extractAssets(html) {
     if (!html)
         return { scripts: [], styles: [] };
     const scripts = [...html.matchAll(/<script[^>]+src="([^"]+\.js)"[^>]*>/g)].map((match) => match[1]);
-    const styles = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+\.css)"[^>]*>/g)].map((match) => match[1]);
+    const styles = [
+        ...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+\.css)"[^>]*>/g),
+    ].map((match) => match[1]);
     return { scripts, styles };
 }
 function renderSitemap(routes, hostname) {
@@ -209,8 +216,12 @@ Sitemap: ${base}/sitemap.xml
 `;
 }
 function renderRouteHtml(route, assets) {
-    const scripts = assets.scripts.map((src) => `<script type="module" crossorigin src="${escapeHtml(src)}"></script>`).join('\n');
-    const styles = assets.styles.map((href) => `<link rel="stylesheet" href="${escapeHtml(href)}">`).join('\n');
+    const scripts = assets.scripts
+        .map((src) => `<script type="module" crossorigin src="${escapeHtml(src)}"></script>`)
+        .join('\n');
+    const styles = assets.styles
+        .map((href) => `<link rel="stylesheet" href="${escapeHtml(href)}">`)
+        .join('\n');
     const title = escapeHtml(route.metadata.title);
     const description = route.metadata.description ? escapeHtml(route.metadata.description) : title;
     return `<!doctype html>

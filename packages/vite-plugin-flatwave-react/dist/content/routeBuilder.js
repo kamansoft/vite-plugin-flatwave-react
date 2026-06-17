@@ -46,7 +46,7 @@ function buildAlternatives(locales, getRoute) {
     }
     return alternatives;
 }
-function buildSeoMetadata(frontmatter, route, locale) {
+function buildSeoMetadata(frontmatter, route, _locale) {
     return {
         title: String(frontmatter.title || ''),
         description: frontmatter.description ? String(frontmatter.description) : undefined,

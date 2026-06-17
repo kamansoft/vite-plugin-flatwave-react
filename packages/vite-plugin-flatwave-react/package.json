@@ -25,6 +25,9 @@
     "./types": {
       "types": "./dist/types.d.ts"
     },
+    "./virtual": {
+      "types": "./dist/react/virtual.d.ts"
+    },
     "./package.json": "./package.json"
   },
   "bin": {
@@ -61,7 +64,7 @@
     "directory": "packages/vite-plugin-flatwave-react"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "publishConfig": {
     "access": "public"

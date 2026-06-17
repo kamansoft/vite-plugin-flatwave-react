@@ -51,17 +51,16 @@ Each Markdown file needs baseline frontmatter:
 
 ```yaml
 ---
-title: "Page title"
-slug: "page-slug"
-id: "unique-id"
-component: "SimplePage"
+title: 'Page title'
+slug: 'page-slug'
+id: 'unique-id'
+component: 'SimplePage'
 public: true
-description: "Short description"
-canonical: "/es/page-slug"
-robots: "index, follow"
-keywords: ["tag1", "tag2"]
+description: 'Short description'
+canonical: '/es/page-slug'
+robots: 'index, follow'
+keywords: ['tag1', 'tag2']
 ---
-
 Markdown body.
 ```
 
@@ -70,7 +69,11 @@ Additional frontmatter fields are preserved in `attributes` and forwarded to the
 ## React hooks
 
 ```ts
-import { useFlatwaveContent, useFlatwaveRoutes, useFlatwaveAlternatives } from 'vite-plugin-flatwave-react/react';
+import {
+  useFlatwaveContent,
+  useFlatwaveRoutes,
+  useFlatwaveAlternatives,
+} from 'vite-plugin-flatwave-react/react';
 ```
 
 ## Build outputs

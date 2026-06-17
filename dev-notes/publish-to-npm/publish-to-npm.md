@@ -36,18 +36,20 @@ every PR merge to `main`") refined into a tracked story. A first-pass implementa
   - repo `kamansoft/vite-plugin-flatwave-react` is **public**, default branch `main`, **no branch protection**
   - not logged into npm locally; `NPM_TOKEN` secret presence **unconfirmed**
 
-**Gap vs. target:** current behavior is *patch-only* bumping and *token-based* auth. The
+**Gap vs. target:** current behavior is _patch-only_ bumping and _token-based_ auth. The
 decisions in §4 change both. The existing `bump-patch-version.js` + manual bump/commit/push
 steps are therefore expected to be **replaced**, not extended.
 
 ## 3. Goals & non-goals
 
 ### Goals
+
 - Zero-touch release on merge to `main`, version derived from commit history.
 - Eliminate long-lived npm credentials from CI (OIDC).
 - Keep supply-chain provenance.
 
 ### Non-goals (out of scope for this story)
+
 - Publishing the example app or the workspace root (they stay `private`).
 - Enforcing commit message format via tooling (commitlint) — optional follow-up.
 - Multi-package / monorepo release orchestration (only one publishable package today).
@@ -60,7 +62,7 @@ steps are therefore expected to be **replaced**, not extended.
 2. **Auth = npm Trusted Publishing (OIDC)**: tokenless; remove reliance on `NPM_TOKEN`.
 3. **Provenance**: keep enabled.
 4. **Docs** confirmed up to date (Step 0.1) — proceed.
-5. **Execution environment:** local one-time/rare manual publishes and the local dry-run run on the host via a **momentary `nvm use`** (Node ≥ 22.14); the default Node is unchanged and nothing is installed globally (release tooling stays a repo devDependency). Routine releases run automatically in CI on the GitHub Actions runner (native). *(Docker was evaluated but the container ran git as root over the host-owned bind mount → `ENOGITREPO`; nvm is simpler.)*
+5. **Execution environment:** local one-time/rare manual publishes and the local dry-run run on the host via a **momentary `nvm use`** (Node ≥ 22.14); the default Node is unchanged and nothing is installed globally (release tooling stays a repo devDependency). Routine releases run automatically in CI on the GitHub Actions runner (native). _(Docker was evaluated but the container ran git as root over the host-owned bind mount → `ENOGITREPO`; nvm is simpler.)_
 
 ## 5. Functional requirements
 

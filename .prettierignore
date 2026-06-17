@@ -1,0 +1,19 @@
+# Ignore directories that are not part of the project
+.agent/
+.claude/
+.codex/
+.cursor/
+.gemini/
+.kilocode/
+.opencode/
+.trae/
+.kilo/
+.dev-notes/
+.docs/
+.e2e/
+.openspec/
+current-working-project-with-features/
+node_modules/
+dist/
+*.log
+.DS_Store

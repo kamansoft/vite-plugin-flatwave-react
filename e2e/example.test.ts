@@ -43,7 +43,9 @@ describe('Flatwave example e2e', () => {
   });
 
   it('builds the plugin and example static site', () => {
-    expect(existsSync(path.resolve(root, 'packages/vite-plugin-flatwave-react/dist/index.js'))).toBe(true);
+    expect(
+      existsSync(path.resolve(root, 'packages/vite-plugin-flatwave-react/dist/index.js'))
+    ).toBe(true);
     expect(existsSync(path.resolve(exampleDist, 'index.html'))).toBe(true);
   });
 
@@ -70,10 +72,14 @@ describe('Flatwave example e2e', () => {
   it('generates sitemap and robots from the route inventory', () => {
     const sitemap = readFileSync(path.resolve(exampleDist, 'sitemap.xml'), 'utf-8');
     const robots = readFileSync(path.resolve(exampleDist, 'robots.txt'), 'utf-8');
-    const manifest = JSON.parse(readFileSync(path.resolve(exampleDist, 'route-manifest.json'), 'utf-8')) as Array<{ locale: string; path: string }>;
+    const manifest = JSON.parse(
+      readFileSync(path.resolve(exampleDist, 'route-manifest.json'), 'utf-8')
+    ) as Array<{ locale: string; path: string }>;
 
     expect(manifest).toHaveLength(6);
-    expect(manifest.map((route) => route.path)).toEqual(expect.arrayContaining(['/es/about', '/pt/program']));
+    expect(manifest.map((route) => route.path)).toEqual(
+      expect.arrayContaining(['/es/about', '/pt/program'])
+    );
     expect(sitemap).toContain('<loc>http://localhost:4173/es/about</loc>');
     expect(robots).toContain('Sitemap: http://localhost:4173/sitemap.xml');
   });
@@ -103,7 +109,7 @@ describe('Flatwave example e2e', () => {
         '--components-dir',
         'examples/basic-react-site/src/components',
       ],
-      { cwd: root, encoding: 'utf-8' },
+      { cwd: root, encoding: 'utf-8' }
     );
 
     expect(output).toContain('Flatwave validation passed');
