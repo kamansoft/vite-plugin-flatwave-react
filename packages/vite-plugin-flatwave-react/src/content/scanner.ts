@@ -11,7 +11,10 @@ export interface ParsedMarkdownFile {
   frontmatter: FlatwaveFrontmatter;
 }
 
-export async function scanMarkdownFiles(contentDir: string, locales: string[]): Promise<ParsedMarkdownFile[]> {
+export async function scanMarkdownFiles(
+  contentDir: string,
+  locales: string[]
+): Promise<ParsedMarkdownFile[]> {
   const files: ParsedMarkdownFile[] = [];
 
   for (const locale of locales) {
@@ -63,7 +66,7 @@ export function isPublicEntry(frontmatter: FlatwaveFrontmatter): boolean {
 
 export function buildContentEntry(
   parsed: ParsedMarkdownFile,
-  alternatives: Record<string, string>,
+  alternatives: Record<string, string>
 ): FlatwaveContentEntry {
   const route = routeForLocaleSlug(parsed.locale, parsed.slug);
   const attributes = { ...parsed.frontmatter };

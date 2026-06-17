@@ -1,0 +1,8 @@
+{
+  "packages": {
+    "packages/vite-plugin-flatwave-react": {
+      "release-type": "node",
+      "versioning-strategy": "default"
+    }
+  }
+}

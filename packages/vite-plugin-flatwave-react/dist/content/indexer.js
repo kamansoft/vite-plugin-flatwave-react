@@ -14,7 +14,8 @@ export async function buildIndex(options) {
             path: routeForLocaleSlug(file.locale, file.slug),
             file: file.file,
             component: file.frontmatter.component ? String(file.frontmatter.component) : undefined,
-            public: file.frontmatter.public !== false && String(file.frontmatter.public ?? 'true').toLowerCase() !== 'false',
+            public: file.frontmatter.public !== false &&
+                String(file.frontmatter.public ?? 'true').toLowerCase() !== 'false',
             attributes: { ...file.frontmatter },
             frontmatter: file.frontmatter,
             body: file.body,

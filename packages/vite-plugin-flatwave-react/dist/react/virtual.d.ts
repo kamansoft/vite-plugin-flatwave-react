@@ -27,7 +27,10 @@ declare module 'virtual:flatwave/content' {
   export function getContent(id: string, locale?: string): FlatwaveVirtualContent | undefined;
   export function getAllContent(): FlatwaveVirtualContent[];
   export function getRoutes(locale?: string): FlatwaveVirtualRoute[];
-  export function getAlternatives(contentId: string, currentLocale?: string): Record<string, string>;
+  export function getAlternatives(
+    contentId: string,
+    currentLocale?: string
+  ): Record<string, string>;
   export function getLocale(locale?: string): string | undefined;
   export function getLocales(): string[];
   export function getDefaultLocale(): string;

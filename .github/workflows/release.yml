@@ -1,74 +1,42 @@
-name: Publish npm package
+name: Release
 
 on:
-  pull_request:
-    types: [closed]
+  push:
     branches: [main]
-  release:
-    types: [published]
   workflow_dispatch:
 
 permissions:
-  contents: write
-  id-token: write
+  contents: write # @semantic-release/github: create the GitHub Release and git tag
+  issues: write # @semantic-release/github: comment on released issues
+  pull-requests: write # @semantic-release/github: comment on released pull requests
+  id-token: write # OIDC trusted publishing + automatic npm provenance (no NPM_TOKEN)
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' || (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
-
     steps:
-      - name: Check out main
-        uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          ref: main
-          token: ${{ github.token }}
+          fetch-depth: 0 # full history + tags so semantic-release can analyze commits
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
-          package-manager-cache: false
+          node-version: '24' # ships npm >= 11.5.1, required for npm OIDC trusted publishing
+          # NOTE: intentionally NO registry-url. It writes an .npmrc that conflicts with
+          # semantic-release's OIDC auth (causes EINVALIDNPMTOKEN).
 
-      - name: Install latest npm CLI
-        run: npm install -g npm@latest
-
-      - name: Bump patch version for merged PR
-        if: github.event_name == 'pull_request'
-        run: node packages/vite-plugin-flatwave-react/scripts/bump-patch-version.js
-
-      - name: Update package lock
-        if: github.event_name == 'pull_request'
-        run: npm install --package-lock-only --ignore-scripts
+      - name: Show toolchain versions
+        run: node -v && npm -v
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Commit version bump
-        if: github.event_name == 'pull_request'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add packages/vite-plugin-flatwave-react/package.json package-lock.json
-          if ! git diff --cached --quiet; then
-            NEW_VERSION=$(node -p "require('./packages/vite-plugin-flatwave-react/package.json').version")
-            git commit -m "chore: bump plugin version to ${NEW_VERSION}"
-            git push origin HEAD:main
-          fi
-
       - name: Build plugin
         run: npm run build:plugin
 
-      - name: Inspect npm tarball
-        run: npm pack --workspace=vite-plugin-flatwave-react --dry-run
-
-      - name: Publish to npm
-        run: |
-          if [ -n "${NPM_TOKEN:-}" ]; then
-            export NODE_AUTH_TOKEN="${NPM_TOKEN}"
-          fi
-          npm publish --provenance --access public
-        working-directory: packages/vite-plugin-flatwave-react
+      - name: Release
+        run: npx semantic-release
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,6 +1,6 @@
 import type { FlatwaveContentEntry, FlatwaveContentIndex, FlatwaveContentOptions } from '../types';
 import { buildContentIndex } from './routeBuilder.js';
-import { routeForLocaleSlug, buildContentEntry, scanMarkdownFiles } from './scanner.js';
+import { routeForLocaleSlug, scanMarkdownFiles } from './scanner.js';
 
 export async function buildIndex(options: FlatwaveContentOptions): Promise<FlatwaveContentIndex> {
   const parsed = await scanMarkdownFiles(options.contentDir, options.locales);
@@ -17,7 +17,9 @@ export async function buildIndex(options: FlatwaveContentOptions): Promise<Flatw
       path: routeForLocaleSlug(file.locale, file.slug),
       file: file.file,
       component: file.frontmatter.component ? String(file.frontmatter.component) : undefined,
-      public: file.frontmatter.public !== false && String(file.frontmatter.public ?? 'true').toLowerCase() !== 'false',
+      public:
+        file.frontmatter.public !== false &&
+        String(file.frontmatter.public ?? 'true').toLowerCase() !== 'false',
       attributes: { ...file.frontmatter },
       frontmatter: file.frontmatter,
       body: file.body,

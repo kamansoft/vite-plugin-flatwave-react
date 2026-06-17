@@ -23,7 +23,8 @@ export async function validateContent(options) {
             path: route,
             file: file.file,
             component: file.frontmatter.component ? String(file.frontmatter.component) : undefined,
-            public: file.frontmatter.public !== false && String(file.frontmatter.public ?? 'true').toLowerCase() !== 'false',
+            public: file.frontmatter.public !== false &&
+                String(file.frontmatter.public ?? 'true').toLowerCase() !== 'false',
             attributes: file.frontmatter,
             frontmatter: file.frontmatter,
             body: file.body,
@@ -35,7 +36,8 @@ export async function validateContent(options) {
     if (index.routes.length === 0) {
         warnings.push(`No public routes were generated from ${options.contentDir}.`);
     }
-    if (options.strictMissingLocales && warnings.some((warning) => warning.startsWith('[missing-locale]'))) {
+    if (options.strictMissingLocales &&
+        warnings.some((warning) => warning.startsWith('[missing-locale]'))) {
         errors.push(...warnings.filter((warning) => warning.startsWith('[missing-locale]')));
     }
     return { errors, warnings };
@@ -113,7 +115,11 @@ async function validateComponents(files, options, errors) {
     }
 }
 async function discoverComponents(componentsDir) {
-    const dirs = Array.isArray(componentsDir) ? componentsDir : componentsDir ? [componentsDir] : ['src/components', 'src/pages'];
+    const dirs = Array.isArray(componentsDir)
+        ? componentsDir
+        : componentsDir
+            ? [componentsDir]
+            : ['src/components', 'src/pages'];
     const components = new Set();
     for (const dir of dirs) {
         const absolute = path.resolve(dir);

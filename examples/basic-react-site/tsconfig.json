@@ -16,6 +16,6 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src"],
+  "include": ["src", "../../packages/vite-plugin-flatwave-react/dist/react/virtual.d.ts"],
   "references": []
 }
