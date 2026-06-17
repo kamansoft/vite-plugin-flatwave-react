@@ -1,6 +1,6 @@
 {
-  "packages/**/*.{ts,tsx,js,jsx}": ["eslint --fix --config .eslintrc.cjs", "prettier --write"],
-  "examples/**/*.{ts,tsx,js,jsx}": ["eslint --fix --config .eslintrc.cjs", "prettier --write"],
+  "packages/**/*.{ts,tsx,js,jsx}": ["eslint --fix --config eslint.config.mjs", "prettier --write"],
+  "examples/**/*.{ts,tsx,js,jsx}": ["eslint --fix --config eslint.config.mjs", "prettier --write"],
   "packages/**/*.{json,md,yml,yaml}": ["prettier --write"],
   "examples/**/*.{json,md,yml,yaml}": ["prettier --write"],
   "*.{json,md,yml,yaml}": ["prettier --write"]
