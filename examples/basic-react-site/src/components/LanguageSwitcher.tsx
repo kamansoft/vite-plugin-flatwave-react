@@ -1,6 +1,12 @@
 import { getAlternatives } from 'virtual:flatwave/content';
 
-export function LanguageSwitcher({ currentLocale, contentId }: { currentLocale: string; contentId: string }) {
+export function LanguageSwitcher({
+  currentLocale,
+  contentId,
+}: {
+  currentLocale: string;
+  contentId: string;
+}) {
   const alternatives = getAlternatives(contentId, currentLocale);
 
   return (

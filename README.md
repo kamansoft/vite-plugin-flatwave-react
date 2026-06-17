@@ -76,11 +76,11 @@ export default defineConfig({
     react(),
     flatwaveContent({
       contentDir: path.resolve(__dirname, 'src/content'), // markdown files live here
-      locales: ['es', 'pt'],                               // supported languages
-      defaultLocale: 'es',                                 // must be included in locales
-      strictMissingLocales: false,                         // warn only; true = fail build
+      locales: ['es', 'pt'], // supported languages
+      defaultLocale: 'es', // must be included in locales
+      strictMissingLocales: false, // warn only; true = fail build
       componentsDir: path.resolve(__dirname, 'src/components'), // optional component validation
-      sitemap: { hostname: 'https://example.com' },       // used for sitemap.xml & robots.txt
+      sitemap: { hostname: 'https://example.com' }, // used for sitemap.xml & robots.txt
     }),
   ],
 });
@@ -110,15 +110,15 @@ Each `.md` file must contain at least the **baseline front‑matter** fields:
 
 ```yaml
 ---
-title: "Page title"
-slug: "page-slug"          # URL segment, without leading slash
-id: "unique-id"            # groups translations together
-component: "SimplePage"    # React component name (must exist under componentsDir)
-public: true               # false → omitted from route manifest / sitemap
-description: "Short description"
-canonical: "/es/page-slug" # optional, defaults to locale‑prefixed route
-robots: "index, follow"
-keywords: [ "tag1", "tag2" ]
+title: 'Page title'
+slug: 'page-slug' # URL segment, without leading slash
+id: 'unique-id' # groups translations together
+component: 'SimplePage' # React component name (must exist under componentsDir)
+public: true # false → omitted from route manifest / sitemap
+description: 'Short description'
+canonical: '/es/page-slug' # optional, defaults to locale‑prefixed route
+robots: 'index, follow'
+keywords: ['tag1', 'tag2']
 # Any additional keys are preserved in `attributes` and forwarded to the component
 ---
 Markdown body (GitHub‑flavoured, no MDX in v1)
@@ -128,15 +128,15 @@ Markdown body (GitHub‑flavoured, no MDX in v1)
 
 ## Development workflow (monorepo)
 
-| Command | What it does |
-|---------|---------------|
-| `npm run build:plugin` | `tsc` compiles `packages/vite-plugin-flatwave-react` → `dist/` |
-| `npm run build:example` | Builds the React example (`examples/basic-react-site`) using the local plugin |
-| `npm run build` | Runs both of the above |
-| `npm run validate:example` | Executes the standalone validation CLI against the example content |
-| `npm run test:e2e` | Builds everything, starts a static `serve` on `dist/`, runs Vitest e2e checks |
-| `npm run dev -w @flatwave/example-basic-react-site` | Starts Vite dev server for the example (port 8080) |
-| `npm run preview -w @flatwave/example-basic-react-site` | Serves the production build (`dist/`) on port 4173 |
+| Command                                                 | What it does                                                                  |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `npm run build:plugin`                                  | `tsc` compiles `packages/vite-plugin-flatwave-react` → `dist/`                |
+| `npm run build:example`                                 | Builds the React example (`examples/basic-react-site`) using the local plugin |
+| `npm run build`                                         | Runs both of the above                                                        |
+| `npm run validate:example`                              | Executes the standalone validation CLI against the example content            |
+| `npm run test:e2e`                                      | Builds everything, starts a static `serve` on `dist/`, runs Vitest e2e checks |
+| `npm run dev -w @flatwave/example-basic-react-site`     | Starts Vite dev server for the example (port 8080)                            |
+| `npm run preview -w @flatwave/example-basic-react-site` | Serves the production build (`dist/`) on port 4173                            |
 
 All commands are defined in the **root `package.json`** (workspace scripts).
 
@@ -155,11 +155,11 @@ npm run dev -w @flatwave/example-basic-react-site
 
 The example demonstrates:
 
-* locale‑prefixed routes (`/es/`, `/pt/about`, …)  
-* browser language detection redirect from `/`  
-* `LanguageSwitcher` built from `getAlternatives()`  
-* `react-markdown` rendering via `MarkdownRenderer`  
-* SEO tags, `sitemap.xml`, `robots.txt`, `route-manifest.json` generated at build time.
+- locale‑prefixed routes (`/es/`, `/pt/about`, …)
+- browser language detection redirect from `/`
+- `LanguageSwitcher` built from `getAlternatives()`
+- `react-markdown` rendering via `MarkdownRenderer`
+- SEO tags, `sitemap.xml`, `robots.txt`, `route-manifest.json` generated at build time.
 
 ---
 
@@ -181,12 +181,12 @@ docker compose -f docker/docker-compose.yml up static
 
 **Files**
 
-| File | Purpose |
-|------|---------|
+| File                        | Purpose                                        |
+| --------------------------- | ---------------------------------------------- |
 | `docker/docker-compose.yml` | Orchestrates `dev`, `build`, `static` services |
-| `docker/dev.Dockerfile` | Installs deps, runs `npm run dev` |
-| `docker/build.Dockerfile` | Installs deps, runs `npm run build` |
-| `docker/nginx.conf` | SPA fallback + static file serving |
+| `docker/dev.Dockerfile`     | Installs deps, runs `npm run dev`              |
+| `docker/build.Dockerfile`   | Installs deps, runs `npm run build`            |
+| `docker/nginx.conf`         | SPA fallback + static file serving             |
 
 The same stack is used by the **e2e test** (`npm run test:e2e`) to guarantee that the produced `dist/` works behind a real static server.
 
@@ -205,8 +205,8 @@ node packages/vite-plugin-flatwave-react/dist/cli/validate.js \
   --strict-missing   # optional: turn missing‑locale warnings into errors
 ```
 
-*Exit code 0* → validation passed (warnings printed to stderr).  
-*Exit code 1* → errors found (or strict‑missing triggered).
+_Exit code 0_ → validation passed (warnings printed to stderr).  
+_Exit code 1_ → errors found (or strict‑missing triggered).
 
 The CLI re‑uses the exact same validator the Vite plugin runs at `buildStart`, guaranteeing parity between CI and local dev.
 
@@ -244,89 +244,52 @@ vite-plugin-flatwave-react/
 
 ## Publishing to npm
 
-The package metadata is configured for public npm publication from `packages/vite-plugin-flatwave-react`.
+Releases are **fully automated** with [semantic-release](https://github.com/semantic-release/semantic-release). On every push to `main` (i.e. when a PR is merged), `.github/workflows/release.yml`:
 
-### One-time local publish
+1. Installs dependencies and builds the plugin.
+2. Analyzes the commit messages since the last release ([Conventional Commits](https://www.conventionalcommits.org/)) to determine the next version.
+3. Publishes `packages/vite-plugin-flatwave-react` to npm via **OIDC trusted publishing** — no `NPM_TOKEN` — with provenance generated automatically.
+4. Creates the git tag `vX.Y.Z` and a GitHub Release with generated notes.
 
-1. Log in locally:
+If there are no release-worthy commits, nothing is published.
 
-   ```bash
-   npm adduser
-   npm whoami
-   ```
+### Commit messages drive the version
 
-2. From the monorepo root, build and inspect the package tarball:
+| Commit                                            | Release                   |
+| ------------------------------------------------- | ------------------------- |
+| `fix: …`                                          | patch (`0.1.0` → `0.1.1`) |
+| `feat: …`                                         | minor (`0.1.0` → `0.2.0`) |
+| `feat!: …` or a `BREAKING CHANGE:` footer         | major (`0.1.0` → `1.0.0`) |
+| `chore:`, `docs:`, `refactor:`, `test:`, `ci:`, … | none                      |
 
-   ```bash
-   npm run build:plugin
-   npm pack --workspace=vite-plugin-flatwave-react --dry-run
-   ```
+Write Conventional Commit messages (or use Conventional-Commit PR titles with squash-merge).
 
-3. Publish from the package directory:
+### One-time setup (before the first automated release)
 
-   ```bash
-   cd packages/vite-plugin-flatwave-react
-   npm publish --provenance --access public
-   ```
+Trusted publishing requires the package to already exist on npm, so a maintainer runs a **one-time bootstrap** — full steps in [`dev-notes/publish-to-npm/bootstrap-and-trusted-publisher.md`](dev-notes/publish-to-npm/bootstrap-and-trusted-publisher.md):
 
-For the first public scoped package publish, `--access public` is required. This package is currently configured as an unscoped package, but the flag is harmless and keeps the command ready if you later change the name to `@kamansoft/vite-plugin-flatwave-react`.
+1. Publish the initial version once to create the package on npm.
+2. Add the **Trusted Publisher** on npmjs.com → package **Settings → Trusted Publisher → GitHub Actions**: user/org `kamansoft`, repo `vite-plugin-flatwave-react`, workflow `release.yml`.
+3. Push the baseline tag `v0.1.0` so semantic-release continues the 0.x line (otherwise the first automated release defaults to `1.0.0`).
 
-### Automatic publish on merged PRs
+After that, every merge to `main` releases automatically — no tokens, no manual version edits.
 
-The release workflow listens for merged PRs to `main`. When a PR is merged, GitHub Actions:
+### Local dry-run
 
-1. Checks out `main`.
-2. Reads `packages/vite-plugin-flatwave-react/package.json`.
-3. Preserves the `MAJOR` and `MINOR` numbers already present in the PR.
-4. Increments only the `PATCH` number.
-5. Updates `package-lock.json`.
-6. Commits and pushes the version bump back to `main`.
-7. Publishes the bumped version to npm with provenance.
-
-Examples:
-
-| Version in merged PR | Version published by workflow |
-|----------------------|-------------------------------|
-| `1.0.0`              | `1.0.1`                       |
-| `1.1.0`              | `1.1.1`                       |
-| `1.1.1`              | `1.1.2`                       |
-| `2.0.0`              | `2.0.1`                       |
-
-This means PR authors can change major or minor versions, while the workflow only advances the patch number.
-
-### Recommended CI publish with trusted publishing
-
-Trusted publishing avoids long-lived npm tokens. Configure it on npmjs.com for the package:
-
-- Organization/user: `kamansoft`
-- Repository: `vite-plugin-flatwave-react`
-- Workflow filename: `release.yml`
-- Allowed action: `npm publish` or `npm stage publish`
-- Environment: optional
-
-The workflow uses GitHub-hosted runners, Node 24, `id-token: write`, and `npm publish --provenance --access public`.
-
-### Token fallback
-
-If you do not use trusted publishing, create an npm granular access token or automation token with bypass-2FA enabled for write actions, then store it as a repository secret named `NPM_TOKEN`. The workflow falls back to that secret when trusted publishing is not configured.
-
-### Manual versioning
-
-npm never reuses a published name/version pair. Before publishing, update:
+Preview the next version and release notes without publishing. The helper uses `nvm` to
+momentarily switch to Node ≥ 22.14 (your default Node is unchanged):
 
 ```bash
-npm version patch --workspace=vite-plugin-flatwave-react
+dev-notes/publish-to-npm/scripts/dry-run-release.sh
 ```
-
-Then run the build and publish commands again.
 
 ---
 
 ## Contributing / extending
 
-1. **Add a new locale** – drop a folder under `src/content/<locale>/` and add the locale to `locales` in `vite.config.ts`.  
-2. **New component** – create `src/components/MyComponent.tsx`, reference it in front‑matter (`component: "MyComponent"`).  
-3. **Extra front‑matter** – any key not in the baseline list is kept in `attributes` and passed to the component; no schema changes required.  
+1. **Add a new locale** – drop a folder under `src/content/<locale>/` and add the locale to `locales` in `vite.config.ts`.
+2. **New component** – create `src/components/MyComponent.tsx`, reference it in front‑matter (`component: "MyComponent"`).
+3. **Extra front‑matter** – any key not in the baseline list is kept in `attributes` and passed to the component; no schema changes required.
 4. **Custom SSG adapter** – the plugin emits a `route-manifest.json`; write a small script that reads it and renders HTML with your favourite framework (the built‑in SSG is a tiny Vite‑native static generator, but the inventory is adapter‑neutral).
 
 ---

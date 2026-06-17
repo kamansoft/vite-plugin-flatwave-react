@@ -1,4 +1,3 @@
-/// <reference path="../virtual.d.ts" />
 import { useMemo } from 'react';
 import { getAllContent, getAlternatives, getContent, getLocale, getLocales, getRoutes, } from 'virtual:flatwave/content';
 export function useFlatwaveContent(id, locale) {

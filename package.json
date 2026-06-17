@@ -12,12 +12,32 @@
     "build:example": "npm run build -w @flatwave/example-basic-react-site",
     "build": "npm run build:plugin && npm run build:example",
     "validate:example": "node packages/vite-plugin-flatwave-react/dist/cli/validate.js --content-dir examples/basic-react-site/src/content --locales es,pt --default-locale es --components-dir examples/basic-react-site/src/components",
-    "test:e2e": "vitest run e2e/example.test.ts"
+    "test:e2e": "vitest run e2e/example.test.ts",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "tsc --noEmit -p packages/vite-plugin-flatwave-react/tsconfig.build.json && tsc --noEmit -p examples/basic-react-site/tsconfig.json",
+    "test": "vitest run",
+    "validate": "npm run format:check && npm run lint && npm run type-check && npm run build && npm run test",
+    "prepare": "husky",
+    "release": "semantic-release"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.3.0",
     "@types/node": "^22.10.2",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.9.0",
+    "eslint-plugin-prettier": "^5.2.0",
+    "eslint-plugin-react": "^7.37.5",
+    "husky": "^9.1.0",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.3.0",
+    "semantic-release": "^25.0.0",
     "serve": "^14.2.6",
     "typescript": "^5.7.2",
+    "typescript-eslint": "^8.61.1",
     "vitest": "^2.1.8"
   }
 }

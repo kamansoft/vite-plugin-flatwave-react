@@ -1,0 +1,36 @@
+name: PR Title Validation
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-pr-title:
+    runs-on: ubuntu-latest
+    name: Validate PR Title
+    steps:
+      - name: Check PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            chore
+            revert
+            build
+            ci
+          requireScope: false
+          subjectPattern: ^(?!.{101}).+$
+          subjectPatternError: |
+            The PR title subject must be 100 characters or less.
+            Example: "feat(api): add new validation method"

@@ -1,16 +1,16 @@
 ---
-title: "Sobre"
-slug: "about"
-id: "about"
-component: "SimplePage"
+title: 'Sobre'
+slug: 'about'
+id: 'about'
+component: 'SimplePage'
 public: true
-description: "Página sobre o exemplo Flatwave."
-canonical: "/pt/about"
-robots: "index, follow"
+description: 'Página sobre o exemplo Flatwave.'
+canonical: '/pt/about'
+robots: 'index, follow'
 keywords:
   - flatwave
   - sobre
-menu: "main"
+menu: 'main'
 menu_position: 2
 ---
 

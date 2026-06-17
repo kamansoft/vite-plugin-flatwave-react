@@ -25,10 +25,13 @@
     "./types": {
       "types": "./dist/types.d.ts"
     },
+    "./virtual": {
+      "types": "./dist/react/virtual.d.ts"
+    },
     "./package.json": "./package.json"
   },
   "bin": {
-    "flatwave-validate": "./dist/cli/validate.js"
+    "flatwave-validate": "dist/cli/validate.js"
   },
   "files": [
     "dist",
@@ -61,11 +64,10 @@
     "directory": "packages/vite-plugin-flatwave-react"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "peerDependencies": {
     "vite": "^5.0.0 || ^6.0.0 || ^7.0.0",

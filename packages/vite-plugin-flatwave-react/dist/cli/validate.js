@@ -12,8 +12,14 @@ program
     .option('--strict-missing', 'Fail when locale variants are missing', false)
     .option('--no-validate-components', 'Disable component existence validation')
     .action(async (options) => {
-    const locales = options.locales.split(',').map((locale) => locale.trim()).filter(Boolean);
-    const componentsDir = options.componentsDir.split(',').map((dir) => dir.trim()).filter(Boolean);
+    const locales = options.locales
+        .split(',')
+        .map((locale) => locale.trim())
+        .filter(Boolean);
+    const componentsDir = options.componentsDir
+        .split(',')
+        .map((dir) => dir.trim())
+        .filter(Boolean);
     const result = await validateContent({
         contentDir: options.contentDir,
         locales,
