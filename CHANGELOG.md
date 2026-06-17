@@ -8,8 +8,7 @@
 
 ### Features
 
-- **automation:** basic scaffolding for linting formating and pipelines ([81f8716](https://github.com/kamansoft/vite-plugin-flatwave-react/commit/81f87165130c39a004db274381ece3b65ff4ea49))
-- **automation:** basic scaffolding for linting formating and pipelines ([81f8716](https://github.com/kamansoft/vite-plugin-flatwave-react/commit/81f87165130c39a004db274381ece3b65ff4ea49))
+- **automation:** basic scaffolding for linting formatting and pipelines ([81f8716](https://github.com/kamansoft/vite-plugin-flatwave-react/commit/81f87165130c39a004db274381ece3b65ff4ea49))
 - **plugin:** ship Flatwave React content plugin and npm release workflow ([f37a8b5](https://github.com/kamansoft/vite-plugin-flatwave-react/commit/f37a8b58f912809852da502de80d391d96256172))
 
 ### Bug Fixes
