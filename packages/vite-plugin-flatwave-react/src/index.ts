@@ -10,6 +10,7 @@ import type { FlatwaveContentIndex, FlatwaveContentOptions, FlatwaveRoute } from
 const VIRTUAL_ID = '\0virtual:flatwave/content';
 const PUBLIC_VIRTUAL_ID = 'virtual:flatwave/content';
 
+// Test comment for lint-staged
 export function flatwaveContent(options: FlatwaveContentOptions): Plugin[] {
   const normalizedOptions = normalizeOptions(options);
   let index: FlatwaveContentIndex = { entries: [], byId: {}, byLocale: {}, routes: [] };
