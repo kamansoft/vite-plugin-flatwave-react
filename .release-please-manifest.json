@@ -4,5 +4,6 @@
       "release-type": "node",
       "versioning-strategy": "default"
     }
-  }
+  },
+  ".": "1.0.0"
 }
