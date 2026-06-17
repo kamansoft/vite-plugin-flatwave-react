@@ -28,7 +28,7 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "flatwave-validate": "./dist/cli/validate.js"
+    "flatwave-validate": "dist/cli/validate.js"
   },
   "files": [
     "dist",
@@ -64,8 +64,7 @@
     "node": ">=18.0.0"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "peerDependencies": {
     "vite": "^5.0.0 || ^6.0.0 || ^7.0.0",
