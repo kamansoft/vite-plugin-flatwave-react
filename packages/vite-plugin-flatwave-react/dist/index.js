@@ -6,6 +6,7 @@ import { routeForLocaleSlug } from './content/scanner.js';
 import { escapeHtml, escapeXml, renderHtmlHead } from './seo/metadata.js';
 const VIRTUAL_ID = '\0virtual:flatwave/content';
 const PUBLIC_VIRTUAL_ID = 'virtual:flatwave/content';
+// Test comment for lint-staged
 export function flatwaveContent(options) {
     const normalizedOptions = normalizeOptions(options);
     let index = { entries: [], byId: {}, byLocale: {}, routes: [] };
