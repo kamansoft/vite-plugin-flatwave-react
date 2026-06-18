@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write # @semantic-release/github: create the GitHub Release and git tag
+  id-token: write # Required for npm OIDC trusted publishing
   issues: write # @semantic-release/github: comment on released issues
   pull-requests: write # @semantic-release/github: comment on released pull requests
 
@@ -24,6 +25,7 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Show toolchain versions
         run: node -v && npm -v
@@ -40,6 +42,6 @@ jobs:
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # No NPM_TOKEN needed when using OIDC trusted publishing
+          # NODE_AUTH_TOKEN is not required; npm CLI will use OIDC automatically
           NPM_CONFIG_REGISTRY: https://registry.npmjs.org
