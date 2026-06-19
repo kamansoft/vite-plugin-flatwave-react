@@ -47,16 +47,16 @@ jobs:
     needs: [ci] # only runs after CI passes
     runs-on: ubuntu-latest
     permissions:
-      contents: write      # create the GitHub Release and git tag
-      id-token: write      # npm OIDC trusted publishing + package provenance
-      issues: write        # let semantic-release comment on released issues
+      contents: write # create the GitHub Release and git tag
+      id-token: write # npm OIDC trusted publishing + package provenance
+      issues: write # let semantic-release comment on released issues
       pull-requests: write # let semantic-release comment on released PRs
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # full history + all tags — required by semantic-release
+          fetch-depth: 0 # full history + all tags — required by semantic-release
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
