@@ -90,15 +90,9 @@ jobs:
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # NPM_TOKEN is read directly by @semantic-release/npm to create a
-          # temporary .npmrc for authentication. This is separate from
-          # NODE_AUTH_TOKEN (which is used by the npm CLI when registry-url
-          # is set in setup-node — we don't use that pattern here).
-          #
-          # Future upgrade path — npm OIDC trusted publishing:
-          #   Once the trusted publisher is configured on npmjs.com for this
-          #   package (see docs/ci-cd-release-automation.md), NPM_TOKEN can
-          #   be removed from this env block entirely. The id-token: write
-          #   permission above will cause npm >=11.5.1 to authenticate via
-          #   OIDC automatically, with no long-lived secret needed.
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # Authentication is handled entirely via npm OIDC trusted publishing.
+          # The id-token: write permission above allows npm >=11.5.1 to
+          # exchange a short-lived GitHub Actions OIDC token with npmjs.com
+          # automatically — no long-lived NPM_TOKEN secret required.
+          # Trusted publisher configured at:
+          # https://www.npmjs.com/package/@kamansoft/vite-plugin-flatwave-react/access
