@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { loadTemplate, extractAssets, injectPreRenderedHtml, injectIntoTemplate } from '../../../src/render/html.js';
+import {
+  loadTemplate,
+  extractAssets,
+  injectPreRenderedHtml,
+  injectIntoTemplate,
+} from '../../../src/render/html.js';
 import * as fs from 'node:fs/promises';
 
 vi.mock('node:fs/promises', () => ({
@@ -47,7 +52,12 @@ describe('prerender/template', () => {
       const preRendered = `<html lang="en"><head><meta charset="UTF-8"><title>Test</title></head><body><div id="root"><h1>Content</h1></div></body></html>`;
       const assets = { scripts: ['/assets/app.js'], styles: ['/assets/style.css'] };
 
-      const result = injectPreRenderedHtml(template, preRendered, { locale: 'en', metadata: { title: 'Test' } }, assets);
+      const result = injectPreRenderedHtml(
+        template,
+        preRendered,
+        { locale: 'en', metadata: { title: 'Test' } },
+        assets
+      );
 
       expect(result).toContain('<link rel="stylesheet" href="/assets/style.css">');
       expect(result).toContain('<script type="module" crossorigin src="/assets/app.js"></script>');

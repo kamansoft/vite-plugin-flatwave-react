@@ -43,11 +43,11 @@ packages/vite-plugin-flatwave-react/src/
 
 Removed/merged areas:
 
-| Old area | Current location |
-|----------|------------------|
-| `src/prerender/` | `src/render/server.tsx`, `src/render/page.ts`, `src/render/html.ts` |
+| Old area           | Current location                                                                                                 |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `src/prerender/`   | `src/render/server.tsx`, `src/render/page.ts`, `src/render/html.ts`                                              |
 | `src/render-loop/` | `src/render/client.tsx`, `src/render/controller.tsx`, `src/render/navigation.ts`, `src/render/scroll-manager.ts` |
-| `src/ssg/` | SSG behavior lives in `src/index.ts` plus `src/render/html.ts` helpers |
+| `src/ssg/`         | SSG behavior lives in `src/index.ts` plus `src/render/html.ts` helpers                                           |
 
 ---
 
@@ -129,14 +129,7 @@ Handles direct `.md` imports. It parses Markdown with `gray-matter` and exports 
 
 ```ts
 {
-  body,
-  attributes,
-  frontmatter,
-  locale,
-  slug,
-  id,
-  route,
-  file
+  (body, attributes, frontmatter, locale, slug, id, route, file);
 }
 ```
 
@@ -189,11 +182,7 @@ Each Markdown file is parsed with `gray-matter` into:
 
 ```ts
 {
-  file,
-  locale,
-  slug,
-  body,
-  frontmatter
+  (file, locale, slug, body, frontmatter);
 }
 ```
 
@@ -266,7 +255,7 @@ SEO metadata is built from frontmatter:
 Default required fields:
 
 ```ts
-['title', 'slug', 'id', 'component', 'public']
+['title', 'slug', 'id', 'component', 'public'];
 ```
 
 ---
@@ -278,15 +267,15 @@ The generated module `virtual:flatwave/content` is the client-side source of tru
 Generated API:
 
 ```ts
-export function getContent(id: string, locale?: string)
-export function getAllContent()
-export function getRoutes(locale?: string)
-export function getAlternatives(contentId: string, currentLocale?: string)
-export function getLocale(locale?: string)
-export function getLocales()
-export function getDefaultLocale()
+export function getContent(id: string, locale?: string);
+export function getAllContent();
+export function getRoutes(locale?: string);
+export function getAlternatives(contentId: string, currentLocale?: string);
+export function getLocale(locale?: string);
+export function getLocales();
+export function getDefaultLocale();
 
-export const flatwaveContentIndex: FlatwaveContentIndex
+export const flatwaveContentIndex: FlatwaveContentIndex;
 ```
 
 The module is generated from the in-memory content index at build start. The client render loop imports `getRoutes()` and `getContent()` from this virtual module.
@@ -342,17 +331,14 @@ src/render/
 Main exports:
 
 ```ts
-createRenderer(ssrEntry, index, componentRegistry)
-createPrerenderer(options, index)
+createRenderer(ssrEntry, index, componentRegistry);
+createPrerenderer(options, index);
 ```
 
 The SSR entry must export:
 
 ```ts
-export async function render(
-  url: string,
-  pageContext: PageContext
-): Promise<string>
+export async function render(url: string, pageContext: PageContext): Promise<string>;
 ```
 
 `PageContext` shape passed to the SSR entry:
@@ -401,14 +387,14 @@ This separation is required because Node.js must not load browser render-loop co
 `src/render/client.tsx` exports the public render-loop API:
 
 ```ts
-startRenderLoop(options)
-destroyRenderLoop()
-getRenderController()
-getCurrentPath()
-navigateTo(path)
-onNavigate(callback)
-getPageContext()
-useFlatwaveRoute()
+startRenderLoop(options);
+destroyRenderLoop();
+getRenderController();
+getCurrentPath();
+navigateTo(path);
+onNavigate(callback);
+getPageContext();
+useFlatwaveRoute();
 ```
 
 `startRenderLoop()` creates a `RenderController`, starts it once, and returns the controller.
@@ -632,7 +618,11 @@ startRenderLoop({
 `src/App.tsx` receives `pageContext` as a prop and renders from it:
 
 ```tsx
-export function App({ pageContext }: { pageContext: { locale: string; content: any; route: any } }) {
+export function App({
+  pageContext,
+}: {
+  pageContext: { locale: string; content: any; route: any };
+}) {
   const { content } = pageContext;
   const Component = content.component === 'ProgramPage' ? ProgramPage : SimplePage;
 
@@ -664,17 +654,17 @@ The example uses `react-dom/server` and `markdown-it`. The plugin does not manda
 
 Current package exports:
 
-| Export | Points to | Purpose |
-|--------|-----------|---------|
-| `vite-plugin-flatwave-react` | `dist/index.js` | Plugin factory |
-| `vite-plugin-flatwave-react/react` | `dist/react/index.js` | React hooks |
-| `vite-plugin-flatwave-react/seo` | `dist/seo/metadata.js` | SEO helper |
-| `vite-plugin-flatwave-react/validation` | `dist/content/validator.js` | Validation API |
-| `vite-plugin-flatwave-react/types` | `dist/types.d.ts` | Type declarations |
-| `vite-plugin-flatwave-react/render-loop` | `dist/render/client.js` | Browser render-loop API |
-| `vite-plugin-flatwave-react/render` | `dist/render/index.js` | Full render barrel export |
-| `vite-plugin-flatwave-react/render/server` | `dist/render/server-entry.js` | Server-safe prerender API |
-| `vite-plugin-flatwave-react/content/indexer` | `dist/content/indexer.js` | Public content index builder |
+| Export                                       | Points to                     | Purpose                      |
+| -------------------------------------------- | ----------------------------- | ---------------------------- |
+| `vite-plugin-flatwave-react`                 | `dist/index.js`               | Plugin factory               |
+| `vite-plugin-flatwave-react/react`           | `dist/react/index.js`         | React hooks                  |
+| `vite-plugin-flatwave-react/seo`             | `dist/seo/metadata.js`        | SEO helper                   |
+| `vite-plugin-flatwave-react/validation`      | `dist/content/validator.js`   | Validation API               |
+| `vite-plugin-flatwave-react/types`           | `dist/types.d.ts`             | Type declarations            |
+| `vite-plugin-flatwave-react/render-loop`     | `dist/render/client.js`       | Browser render-loop API      |
+| `vite-plugin-flatwave-react/render`          | `dist/render/index.js`        | Full render barrel export    |
+| `vite-plugin-flatwave-react/render/server`   | `dist/render/server-entry.js` | Server-safe prerender API    |
+| `vite-plugin-flatwave-react/content/indexer` | `dist/content/indexer.js`     | Public content index builder |
 
 ---
 
@@ -836,22 +826,22 @@ Static hosting must preserve locale-prefixed pathname routes:
 
 ## 16. Migration from HTML-Shell-Only SSG
 
-| Previous behavior | Current behavior |
-|-------------------|------------------|
-| `src/prerender/` owned build-time rendering | `src/render/server.tsx` owns build-time rendering |
-| `src/render-loop/` owned browser rendering | `src/render/client.tsx` + `controller.tsx` own browser rendering |
-| `src/ssg/` existed as a separate area | SSG behavior is in `src/index.ts` plus `src/render/html.ts` |
-| Client app read `window.location.pathname` | Render controller resolves route and passes `pageContext` |
-| Empty root in generated HTML | Full SSR HTML after prerender script |
-| Client data could be route-derived | Client navigation resolves from virtual module, no fetch |
+| Previous behavior                           | Current behavior                                                 |
+| ------------------------------------------- | ---------------------------------------------------------------- |
+| `src/prerender/` owned build-time rendering | `src/render/server.tsx` owns build-time rendering                |
+| `src/render-loop/` owned browser rendering  | `src/render/client.tsx` + `controller.tsx` own browser rendering |
+| `src/ssg/` existed as a separate area       | SSG behavior is in `src/index.ts` plus `src/render/html.ts`      |
+| Client app read `window.location.pathname`  | Render controller resolves route and passes `pageContext`        |
+| Empty root in generated HTML                | Full SSR HTML after prerender script                             |
+| Client data could be route-derived          | Client navigation resolves from virtual module, no fetch         |
 
 ---
 
 ## 17. Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 0.1.0 | 2026-06-16 | Initial render-loop architecture: single `src/render/` pipeline, `createPrerenderer()`, `startRenderLoop()`, pathname routing, manual scroll restoration, SEO-first static output |
+| Version | Date       | Changes                                                                                                                                                                           |
+| ------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.1.0   | 2026-06-16 | Initial render-loop architecture: single `src/render/` pipeline, `createPrerenderer()`, `startRenderLoop()`, pathname routing, manual scroll restoration, SEO-first static output |
 
 ---
 

@@ -1,14 +1,29 @@
-import type { FlatwaveRoute, FlatwaveContentEntry, FlatwaveContentIndex, PrerenderOptions, SerializedPageContext } from '../types';
+import type {
+  FlatwaveRoute,
+  FlatwaveContentEntry,
+  FlatwaveContentIndex,
+  PrerenderOptions,
+  SerializedPageContext,
+} from '../types';
 
-export function resolveRouteByPath(routes: FlatwaveRoute[], path: string): FlatwaveRoute | undefined {
+export function resolveRouteByPath(
+  routes: FlatwaveRoute[],
+  path: string
+): FlatwaveRoute | undefined {
   return routes.find((route) => route.path === path);
 }
 
-export function resolveContentForRoute(route: FlatwaveRoute, index: FlatwaveContentIndex): FlatwaveContentEntry | undefined {
+export function resolveContentForRoute(
+  route: FlatwaveRoute,
+  index: FlatwaveContentIndex
+): FlatwaveContentEntry | undefined {
   return index.byId[route.contentId]?.[route.locale];
 }
 
-export function buildPageContext(route: FlatwaveRoute, content: FlatwaveContentEntry): SerializedPageContext {
+export function buildPageContext(
+  route: FlatwaveRoute,
+  content: FlatwaveContentEntry
+): SerializedPageContext {
   return {
     locale: route.locale,
     route,
@@ -29,9 +44,9 @@ export function filterRoutesForPrerender(
   prerenderOptions: PrerenderOptions | true | false | undefined
 ): FlatwaveRoute[] {
   if (!prerenderOptions) return [];
-  
+
   const options = prerenderOptions === true ? {} : prerenderOptions;
-  
+
   return routes.filter((route) => shouldPrerenderRoute(route, options, routes));
 }
 
@@ -43,7 +58,7 @@ function shouldPrerenderRoute(
   if (options.exclude && options.exclude.some((pattern) => matchRoute(route.path, pattern))) {
     return false;
   }
-  
+
   if (options.routes) {
     if (typeof options.routes === 'function') {
       const allowed = options.routes(allRoutes);
@@ -51,7 +66,7 @@ function shouldPrerenderRoute(
     }
     return options.routes.includes(route.path);
   }
-  
+
   return true;
 }
 
@@ -68,7 +83,10 @@ export function validateRouteForNavigation(
   return route ?? null;
 }
 
-export function getRouteInventory(index: FlatwaveContentIndex): { routes: FlatwaveRoute[]; content: FlatwaveContentEntry[] } {
+export function getRouteInventory(index: FlatwaveContentIndex): {
+  routes: FlatwaveRoute[];
+  content: FlatwaveContentEntry[];
+} {
   return {
     routes: index.routes,
     content: index.entries,

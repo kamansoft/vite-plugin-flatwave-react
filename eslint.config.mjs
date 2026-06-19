@@ -8,6 +8,10 @@ export default tseslint.config(
     ignores: [
       'node_modules/',
       '**/dist/',
+      '**/dist-ssr/',
+      '**/coverage/',
+      '**/test-build-output/',
+      '**/test-e2e-output/',
       '**/*.config.js',
       '**/*.config.ts',
       '.husky/',

@@ -1,20 +1,16 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { readFile, rm, mkdir, readdir } from 'node:fs/promises';
+import { readFile, rm, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'vite';
 import { flatwaveContent } from '../../src/index.js';
 import { createPrerenderer } from '../../src/render/server.js';
-import type { FlatwaveContentIndex } from '../../src/types.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixtureDir = path.resolve(__dirname, '../fixtures/basic-site');
 const testBuildDir = path.resolve(__dirname, '../../test-e2e-output');
 
 describe('E2E: Full build + prerender pipeline', () => {
-  let contentIndex: FlatwaveContentIndex;
-  let normalizedOptions: any;
-
   beforeAll(async () => {
     await rm(testBuildDir, { recursive: true, force: true });
     await mkdir(testBuildDir, { recursive: true });
@@ -47,6 +43,7 @@ describe('E2E: Full build + prerender pipeline', () => {
     const manifest = JSON.parse(await readFile(manifestPath, 'utf-8'));
 
     expect(manifest.length).toBe(6);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const paths = manifest.map((r: any) => r.path).sort();
     expect(paths).toEqual(['/es/', '/es/about', '/es/program', '/pt/', '/pt/about', '/pt/program']);
   });
@@ -73,9 +70,6 @@ describe('E2E: Full build + prerender pipeline', () => {
 });
 
 describe('E2E: Prerenderer function', () => {
-  let contentIndex: FlatwaveContentIndex;
-  let prerenderer: any;
-
   beforeAll(async () => {
     await rm(testBuildDir, { recursive: true, force: true });
     await mkdir(testBuildDir, { recursive: true });
@@ -116,36 +110,35 @@ describe('E2E: Output HTML validation', () => {
       for (const route of routes) {
         const routePath = route === '' ? 'index.html' : `${route}/index.html`;
         const htmlPath = path.resolve(outputDir, locale, routePath);
-        
+
         try {
           const html = await readFile(htmlPath, 'utf-8');
-          
+
           // Check full pre-rendered structure
           expect(html).toContain(`<html lang="${locale}">`);
           expect(html).toContain('<meta charset="UTF-8">');
           expect(html).toContain('<title>');
           expect(html).toContain('<meta name="description"');
           expect(html).toContain('<link rel="canonical"');
-          
+
           // Check hreflang alternates
           expect(html).toContain('<link rel="alternate" hreflang="es"');
           expect(html).toContain('<link rel="alternate" hreflang="pt"');
-          
+
           // Check Open Graph tags
           expect(html).toContain('<meta property="og:');
-          
+
           // Check pre-rendered content (not empty root)
           expect(html).toContain('<div id="root">');
           expect(html).not.toContain('<div id="root"></div>'); // Should have content
-          
+
           // Check for article content
           expect(html).toContain('<article');
           expect(html).toContain('<h1>');
-          
+
           // Check scripts and styles injected
           expect(html).toContain('<script type="module"');
           expect(html).toContain('<link rel="stylesheet"');
-          
         } catch (error) {
           // File might not exist if prerender wasn't run
           console.warn(`Skipping ${htmlPath}: ${error}`);
@@ -156,15 +149,14 @@ describe('E2E: Output HTML validation', () => {
 
   it('should have properly rendered Markdown content in HTML', async () => {
     const htmlPath = path.resolve(outputDir, 'es/about/index.html');
-    
+
     try {
       const html = await readFile(htmlPath, 'utf-8');
-      
+
       // Check Markdown was rendered to HTML
       expect(html).toContain('<h1>Acerca de</h1>');
       expect(html).toContain('<p>Esta página demuestra Markdown');
       expect(html).toContain('<pre><code class="language-md">');
-      
     } catch (error) {
       console.warn(`Skipping markdown test: ${error}`);
     }
@@ -172,13 +164,12 @@ describe('E2E: Output HTML validation', () => {
 
   it('should have component-specific frontmatter rendered', async () => {
     const htmlPath = path.resolve(outputDir, 'es/program/index.html');
-    
+
     try {
       const html = await readFile(htmlPath, 'utf-8');
-      
+
       // Check component-specific frontmatter (date)
       expect(html).toContain('<time dateTime="2026-06-14">2026-06-14</time>');
-      
     } catch (error) {
       console.warn(`Skipping component frontmatter test: ${error}`);
     }

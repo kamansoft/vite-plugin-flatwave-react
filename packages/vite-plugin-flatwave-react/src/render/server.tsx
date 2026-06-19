@@ -1,12 +1,40 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { FlatwaveContentIndex, FlatwaveRoute, FlatwaveContentEntry, NormalizedOptions, PrerenderOptions } from '../types';
+import type {
+  FlatwaveContentIndex,
+  FlatwaveRoute,
+  FlatwaveContentEntry,
+  NormalizedOptions,
+  PrerenderOptions,
+} from '../types';
 import { discoverComponents } from '../content/validator.js';
-import { loadTemplate, extractAssets, injectPreRenderedHtml, injectPageContextScript, renderRouteHtml } from './html.js';
-import { filterRoutesForPrerender, resolveContentForRoute, buildPageContext, serializePageContext } from './page.js';
+import {
+  loadTemplate,
+  extractAssets,
+  injectPreRenderedHtml,
+  injectPageContextScript,
+} from './html.js';
+import {
+  filterRoutesForPrerender,
+  resolveContentForRoute,
+  buildPageContext,
+  serializePageContext,
+} from './page.js';
 
-export { loadTemplate, extractAssets, injectPreRenderedHtml, injectPageContextScript, renderRouteHtml } from './html.js';
-export { filterRoutesForPrerender, resolveContentForRoute, buildPageContext, serializePageContext } from './page.js';
+export {
+  loadTemplate,
+  extractAssets,
+  injectPreRenderedHtml,
+  injectPageContextScript,
+  renderRouteHtml,
+} from './html.js';
+export {
+  filterRoutesForPrerender,
+  resolveContentForRoute,
+  buildPageContext,
+  serializePageContext,
+} from './page.js';
 
 export interface PageContext {
   locale: string;
@@ -33,15 +61,20 @@ export async function createRenderer(
   componentRegistry: Record<string, React.ComponentType<any>>
 ): Promise<Renderer> {
   const ssrModulePath = path.resolve(ssrEntry);
-  
+
   let renderer: Renderer;
   try {
     renderer = await loadSsrModule(ssrModulePath);
   } catch (error) {
-    throw new Error(`Failed to load SSR entry module: ${ssrEntry}\n${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed to load SSR entry module: ${ssrEntry}\n${error instanceof Error ? error.message : String(error)}`
+    );
   }
 
-  const wrappedRenderer: Renderer = async (url: string, pageContext: PageContext): Promise<string> => {
+  const wrappedRenderer: Renderer = async (
+    url: string,
+    pageContext: PageContext
+  ): Promise<string> => {
     const route = index.routes.find((r) => r.path === url);
     if (!route) {
       throw new Error(`Route not found: ${url}`);
@@ -75,19 +108,19 @@ export async function createPrerenderer(
 ): Promise<Prerenderer> {
   const prerenderOptions = normalizePrerenderOptions(options.prerender);
   const ssrEntry = options.ssrEntry || 'src/entry-server.tsx';
-  
+
   let template = '';
   let componentRegistry: Record<string, React.ComponentType<any>> = {};
 
   template = await loadTemplate(options.template);
   componentRegistry = await buildComponentRegistry(options.componentsDir);
-  
+
   const renderer = await createRenderer(ssrEntry, index, componentRegistry);
 
   return {
     async prerender(outputDir: string) {
       const routes = filterRoutesForPrerender(index.routes, prerenderOptions);
-      
+
       const indexHtmlPath = path.resolve(outputDir, 'index.html');
       const indexHtml = await readFile(indexHtmlPath, 'utf-8');
       const assets = extractAssets(indexHtml);
@@ -109,12 +142,12 @@ export async function createPrerenderer(
         };
 
         const appHtml = await renderer(route.path, pageContext);
-        
+
         const serializedContext = serializePageContext(buildPageContext(route, content));
         const htmlWithContext = injectPageContextScript(appHtml, serializedContext);
-        
+
         const fullHtml = injectPreRenderedHtml(template, htmlWithContext, route, assets);
-        
+
         const fileName = route.path.replace(/^\//, '').replace(/\/$/, '') + '/index.html';
         results.push({ path: fileName, html: fullHtml });
       }
@@ -124,13 +157,17 @@ export async function createPrerenderer(
   };
 }
 
-function normalizePrerenderOptions(prerender: NormalizedOptions['prerender']): PrerenderOptions | true | false | undefined {
+function normalizePrerenderOptions(
+  prerender: NormalizedOptions['prerender']
+): PrerenderOptions | true | false | undefined {
   if (!prerender) return undefined;
   if (prerender === true) return {};
   return prerender;
 }
 
-async function buildComponentRegistry(componentsDir?: string | string[]): Promise<Record<string, React.ComponentType<any>>> {
+async function buildComponentRegistry(
+  componentsDir?: string | string[]
+): Promise<Record<string, React.ComponentType<any>>> {
   const componentNames = await discoverComponents(componentsDir);
   const registry: Record<string, React.ComponentType<any>> = {};
 

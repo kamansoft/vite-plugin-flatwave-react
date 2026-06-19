@@ -24,19 +24,19 @@ Important current limitation: the plugin generates localized static HTML shells 
 
 Relevant source files:
 
-| Area | File | Responsibility |
-| --- | --- | --- |
-| Plugin factory | [`packages/vite-plugin-flatwave-react/src/index.ts`](../packages/vite-plugin-flatwave-react/src/index.ts) | Creates the Vite plugin array, normalizes options, exposes virtual modules, renders build assets. |
-| Types | [`packages/vite-plugin-flatwave-react/src/types.ts`](../packages/vite-plugin-flatwave-react/src/types.ts) | Defines options, content entries, routes, SEO metadata, and validation result types. |
-| Markdown scanner | [`packages/vite-plugin-flatwave-react/src/content/scanner.ts`](../packages/vite-plugin-flatwave-react/src/content/scanner.ts) | Discovers Markdown files per locale and parses frontmatter/body. |
-| Parser | [`packages/vite-plugin-flatwave-react/src/content/parser.ts`](../packages/vite-plugin-flatwave-react/src/content/parser.ts) | Parses raw Markdown source for direct `.md` imports. |
-| Indexer | [`packages/vite-plugin-flatwave-react/src/content/indexer.ts`](../packages/vite-plugin-flatwave-react/src/content/indexer.ts) | Builds normalized content entries and locale alternatives. |
-| Route builder | [`packages/vite-plugin-flatwave-react/src/content/routeBuilder.ts`](../packages/vite-plugin-flatwave-react/src/content/routeBuilder.ts) | Converts public entries into route inventory and SEO metadata. |
-| Validator | [`packages/vite-plugin-flatwave-react/src/content/validator.ts`](../packages/vite-plugin-flatwave-react/src/content/validator.ts) | Runs content validation and component discovery. |
-| SEO metadata | [`packages/vite-plugin-flatwave-react/src/seo/metadata.ts`](../packages/vite-plugin-flatwave-react/src/seo/metadata.ts) | Escapes values and renders head tags such as canonical, robots, alternate links, Open Graph, Twitter, and JSON-LD. |
-| React hooks | [`packages/vite-plugin-flatwave-react/src/react/index.ts`](../packages/vite-plugin-flatwave-react/src/react/index.ts) | Provides React hooks backed by the virtual module. |
-| CLI | [`packages/vite-plugin-flatwave-react/src/cli/validate.ts`](../packages/vite-plugin-flatwave-react/src/cli/validate.ts) | Runs the same validation logic as the Vite plugin. |
-| Virtual types | [`packages/vite-plugin-flatwave-react/src/virtual.d.ts`](../packages/vite-plugin-flatwave-react/src/virtual.d.ts) | Declares TypeScript types for `virtual:flatwave/content`. |
+| Area             | File                                                                                                                                    | Responsibility                                                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Plugin factory   | [`packages/vite-plugin-flatwave-react/src/index.ts`](../packages/vite-plugin-flatwave-react/src/index.ts)                               | Creates the Vite plugin array, normalizes options, exposes virtual modules, renders build assets.                  |
+| Types            | [`packages/vite-plugin-flatwave-react/src/types.ts`](../packages/vite-plugin-flatwave-react/src/types.ts)                               | Defines options, content entries, routes, SEO metadata, and validation result types.                               |
+| Markdown scanner | [`packages/vite-plugin-flatwave-react/src/content/scanner.ts`](../packages/vite-plugin-flatwave-react/src/content/scanner.ts)           | Discovers Markdown files per locale and parses frontmatter/body.                                                   |
+| Parser           | [`packages/vite-plugin-flatwave-react/src/content/parser.ts`](../packages/vite-plugin-flatwave-react/src/content/parser.ts)             | Parses raw Markdown source for direct `.md` imports.                                                               |
+| Indexer          | [`packages/vite-plugin-flatwave-react/src/content/indexer.ts`](../packages/vite-plugin-flatwave-react/src/content/indexer.ts)           | Builds normalized content entries and locale alternatives.                                                         |
+| Route builder    | [`packages/vite-plugin-flatwave-react/src/content/routeBuilder.ts`](../packages/vite-plugin-flatwave-react/src/content/routeBuilder.ts) | Converts public entries into route inventory and SEO metadata.                                                     |
+| Validator        | [`packages/vite-plugin-flatwave-react/src/content/validator.ts`](../packages/vite-plugin-flatwave-react/src/content/validator.ts)       | Runs content validation and component discovery.                                                                   |
+| SEO metadata     | [`packages/vite-plugin-flatwave-react/src/seo/metadata.ts`](../packages/vite-plugin-flatwave-react/src/seo/metadata.ts)                 | Escapes values and renders head tags such as canonical, robots, alternate links, Open Graph, Twitter, and JSON-LD. |
+| React hooks      | [`packages/vite-plugin-flatwave-react/src/react/index.ts`](../packages/vite-plugin-flatwave-react/src/react/index.ts)                   | Provides React hooks backed by the virtual module.                                                                 |
+| CLI              | [`packages/vite-plugin-flatwave-react/src/cli/validate.ts`](../packages/vite-plugin-flatwave-react/src/cli/validate.ts)                 | Runs the same validation logic as the Vite plugin.                                                                 |
+| Virtual types    | [`packages/vite-plugin-flatwave-react/src/virtual.d.ts`](../packages/vite-plugin-flatwave-react/src/virtual.d.ts)                       | Declares TypeScript types for `virtual:flatwave/content`.                                                          |
 
 The package entry points are defined in [`packages/vite-plugin-flatwave-react/package.json`](../packages/vite-plugin-flatwave-react/package.json):
 
@@ -101,15 +101,15 @@ flowchart TD
 
 ## 4. Plugin Hook Matrix
 
-| Plugin | Hook | Current behavior |
-| --- | --- | --- |
-| `flatwave-react:content` | `buildStart` | Calls `buildIndex()` and `validateContent()`. Emits warnings through `this.warn()` and errors through `this.error()`. |
-| `flatwave-react:content` | `resolveId` | Resolves the public virtual import `virtual:flatwave/content` to the internal ID `\0virtual:flatwave/content`. |
-| `flatwave-react:content` | `load` | Returns generated JavaScript source that exports content helpers and the full index. |
-| `flatwave-react:content` | `handleHotUpdate` | Rebuilds the index when a changed file ends with `.md`. |
-| `flatwave-react:markdown` | `resolveId` | Resolves `.md` imports to an absolute path based on `process.cwd()`. |
-| `flatwave-react:markdown` | `load` | Parses `.md` files and returns an ES module whose default export is `{ body, attributes, frontmatter, locale, slug, id, route, file }`. |
-| `flatwave-react:ssg` | `generateBundle` | Emits `route-manifest.json`, `sitemap.xml`, `robots.txt`, and one static HTML file per public route. It also extracts JS/CSS asset references from Vite's generated `index.html`. |
+| Plugin                    | Hook              | Current behavior                                                                                                                                                                  |
+| ------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `flatwave-react:content`  | `buildStart`      | Calls `buildIndex()` and `validateContent()`. Emits warnings through `this.warn()` and errors through `this.error()`.                                                             |
+| `flatwave-react:content`  | `resolveId`       | Resolves the public virtual import `virtual:flatwave/content` to the internal ID `\0virtual:flatwave/content`.                                                                    |
+| `flatwave-react:content`  | `load`            | Returns generated JavaScript source that exports content helpers and the full index.                                                                                              |
+| `flatwave-react:content`  | `handleHotUpdate` | Rebuilds the index when a changed file ends with `.md`.                                                                                                                           |
+| `flatwave-react:markdown` | `resolveId`       | Resolves `.md` imports to an absolute path based on `process.cwd()`.                                                                                                              |
+| `flatwave-react:markdown` | `load`            | Parses `.md` files and returns an ES module whose default export is `{ body, attributes, frontmatter, locale, slug, id, route, file }`.                                           |
+| `flatwave-react:ssg`      | `generateBundle`  | Emits `route-manifest.json`, `sitemap.xml`, `robots.txt`, and one static HTML file per public route. It also extracts JS/CSS asset references from Vite's generated `index.html`. |
 
 ## 5. Configuration Model
 
@@ -130,22 +130,22 @@ flatwaveContent({
 
 ### Option defaults and current behavior
 
-| Option | Default / current behavior |
-| --- | --- |
-| `contentDir` | Required. Root directory containing locale folders such as `es/` and `pt/`. |
-| `locales` | Required. Locale folders that are scanned. |
-| `defaultLocale` | Required. Must be included in `locales`. Currently used only by `getDefaultLocale()` and validation. |
-| `requiredFields` | Defaults to `['title', 'slug', 'id', 'component', 'public']`. |
-| `validateComponents` | Defaults to `true`. |
-| `componentsDir` | Defaults to `['src/components', 'src/pages']` inside the validator when `validateComponents` is enabled and no value is supplied. |
-| `strictMissingLocales` | Defaults to `false`. When `true`, missing-locale warnings become build errors. |
-| `fallback` | Typed, but not currently used by the implementation. |
-| `emitRouteManifest` | Defaults to `true`. |
-| `emitSitemap` | Defaults to `true`. |
-| `emitRobotsTxt` | Defaults to `true`. |
-| `sitemap.hostname` | Defaults to `http://localhost:4173`. Used for sitemap URLs and `robots.txt`. |
-| `sitemap.changefreq` / `sitemap.priority` | Typed, but currently ignored. The generated sitemap always uses `weekly` and `0.8`. |
-| `robots` | Typed, but currently ignored. The generated `robots.txt` always allows all paths and points to `sitemap.xml`. |
+| Option                                    | Default / current behavior                                                                                                        |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `contentDir`                              | Required. Root directory containing locale folders such as `es/` and `pt/`.                                                       |
+| `locales`                                 | Required. Locale folders that are scanned.                                                                                        |
+| `defaultLocale`                           | Required. Must be included in `locales`. Currently used only by `getDefaultLocale()` and validation.                              |
+| `requiredFields`                          | Defaults to `['title', 'slug', 'id', 'component', 'public']`.                                                                     |
+| `validateComponents`                      | Defaults to `true`.                                                                                                               |
+| `componentsDir`                           | Defaults to `['src/components', 'src/pages']` inside the validator when `validateComponents` is enabled and no value is supplied. |
+| `strictMissingLocales`                    | Defaults to `false`. When `true`, missing-locale warnings become build errors.                                                    |
+| `fallback`                                | Typed, but not currently used by the implementation.                                                                              |
+| `emitRouteManifest`                       | Defaults to `true`.                                                                                                               |
+| `emitSitemap`                             | Defaults to `true`.                                                                                                               |
+| `emitRobotsTxt`                           | Defaults to `true`.                                                                                                               |
+| `sitemap.hostname`                        | Defaults to `http://localhost:4173`. Used for sitemap URLs and `robots.txt`.                                                      |
+| `sitemap.changefreq` / `sitemap.priority` | Typed, but currently ignored. The generated sitemap always uses `weekly` and `0.8`.                                               |
+| `robots`                                  | Typed, but currently ignored. The generated `robots.txt` always allows all paths and points to `sitemap.xml`.                     |
 
 ## 6. Content Discovery and Normalization
 
@@ -171,22 +171,22 @@ Each locale folder is scanned recursively with `fast-glob` using the pattern `**
 
 Baseline fields used by the plugin:
 
-| Field | Purpose |
-| --- | --- |
-| `title` | Page title and SEO `<title>`. Required by default. |
-| `slug` | URL segment. Required by default. If missing, the file basename is used. |
-| `id` | Content identity used to group translations. Required by default. If missing, the slug is used. |
-| `component` | React component name referenced by the example app. Required by default. |
-| `public` | Controls whether the entry appears in the route index and generated outputs. Required by default. |
-| `description` | SEO description. |
-| `canonical` | Canonical URL. Defaults to the generated route path. |
-| `robots` | Robots meta value. Defaults to `index, follow`. |
-| `keywords` | Array of keywords. |
-| `image` | Open Graph and Twitter image URL. |
-| `jsonLd` | JSON-LD object inserted as a script tag. |
-| `og` | Open Graph metadata object. |
-| `twitter` | Twitter Card metadata object. |
-| `menu` / `menu_position` | Validated as a unique menu position per locale. |
+| Field                    | Purpose                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------- |
+| `title`                  | Page title and SEO `<title>`. Required by default.                                                |
+| `slug`                   | URL segment. Required by default. If missing, the file basename is used.                          |
+| `id`                     | Content identity used to group translations. Required by default. If missing, the slug is used.   |
+| `component`              | React component name referenced by the example app. Required by default.                          |
+| `public`                 | Controls whether the entry appears in the route index and generated outputs. Required by default. |
+| `description`            | SEO description.                                                                                  |
+| `canonical`              | Canonical URL. Defaults to the generated route path.                                              |
+| `robots`                 | Robots meta value. Defaults to `index, follow`.                                                   |
+| `keywords`               | Array of keywords.                                                                                |
+| `image`                  | Open Graph and Twitter image URL.                                                                 |
+| `jsonLd`                 | JSON-LD object inserted as a script tag.                                                          |
+| `og`                     | Open Graph metadata object.                                                                       |
+| `twitter`                | Twitter Card metadata object.                                                                     |
+| `menu` / `menu_position` | Validated as a unique menu position per locale.                                                   |
 
 Additional frontmatter fields are preserved in `attributes` and `frontmatter`, allowing component-specific fields such as `date` and `schedule` in the example.
 
@@ -204,11 +204,11 @@ Rules:
 
 Examples:
 
-| Locale | Slug | Generated path |
-| --- | --- | --- |
-| `es` | `index` | `/es/` |
-| `es` | `about` | `/es/about` |
-| `pt` | `program` | `/pt/program` |
+| Locale | Slug      | Generated path |
+| ------ | --------- | -------------- |
+| `es`   | `index`   | `/es/`         |
+| `es`   | `about`   | `/es/about`    |
+| `pt`   | `program` | `/pt/program`  |
 
 ## 7. Content Index and Route Inventory
 
@@ -295,16 +295,16 @@ flatwaveContentIndex
 
 ### Helper behavior
 
-| Export | Behavior |
-| --- | --- |
-| `getContent(id, locale?)` | Returns the first entry whose `id` matches. If `locale` is provided, the locale must also match. |
-| `getAllContent()` | Returns all public content entries. |
-| `getRoutes(locale?)` | Returns all public routes. If `locale` is provided, filters to that locale. |
-| `getAlternatives(contentId, currentLocale)` | Returns the alternative routes for a content ID, excluding the current locale. |
-| `getLocale(locale)` | Returns the passed locale value. |
-| `getLocales()` | Returns the unique locale values from routes. |
-| `getDefaultLocale()` | Returns the configured `defaultLocale`. |
-| `flatwaveContentIndex` | Exports the complete generated index object. |
+| Export                                      | Behavior                                                                                         |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `getContent(id, locale?)`                   | Returns the first entry whose `id` matches. If `locale` is provided, the locale must also match. |
+| `getAllContent()`                           | Returns all public content entries.                                                              |
+| `getRoutes(locale?)`                        | Returns all public routes. If `locale` is provided, filters to that locale.                      |
+| `getAlternatives(contentId, currentLocale)` | Returns the alternative routes for a content ID, excluding the current locale.                   |
+| `getLocale(locale)`                         | Returns the passed locale value.                                                                 |
+| `getLocales()`                              | Returns the unique locale values from routes.                                                    |
+| `getDefaultLocale()`                        | Returns the configured `defaultLocale`.                                                          |
+| `flatwaveContentIndex`                      | Exports the complete generated index object.                                                     |
 
 The TypeScript declaration for this module is in [`src/virtual.d.ts`](../packages/vite-plugin-flatwave-react/src/virtual.d.ts).
 
@@ -374,16 +374,16 @@ Validation is run during `buildStart` and by the standalone CLI.
 
 ### Validation checks
 
-| Check | Error or warning |
-| --- | --- |
-| Missing required frontmatter fields | Error |
-| Duplicate content ID within a locale | Error |
-| Duplicate slug within a locale | Error |
-| Duplicate `menu` + `menu_position` within a locale | Error |
-| `menu_position` is not numeric when `menu` is set | Error |
-| Referenced component does not exist | Error, unless disabled |
-| Content ID missing in a locale | Warning by default; error when `strictMissingLocales` is true |
-| No public routes generated | Warning |
+| Check                                              | Error or warning                                              |
+| -------------------------------------------------- | ------------------------------------------------------------- |
+| Missing required frontmatter fields                | Error                                                         |
+| Duplicate content ID within a locale               | Error                                                         |
+| Duplicate slug within a locale                     | Error                                                         |
+| Duplicate `menu` + `menu_position` within a locale | Error                                                         |
+| `menu_position` is not numeric when `menu` is set  | Error                                                         |
+| Referenced component does not exist                | Error, unless disabled                                        |
+| Content ID missing in a locale                     | Warning by default; error when `strictMissingLocales` is true |
+| No public routes generated                         | Warning                                                       |
 
 ### Component discovery
 
@@ -404,16 +404,16 @@ SEO metadata is built from frontmatter in `routeBuilder.ts` and rendered in `seo
 
 ### Metadata fields
 
-| Frontmatter | Generated output |
-| --- | --- |
-| `title` | `<title>` and default description fallback. |
-| `description` | `<meta name="description">`. |
-| `canonical` | `<link rel="canonical">`. Defaults to the generated route path. |
-| `robots` | `<meta name="robots">`. Defaults to `index, follow`. |
-| `image` | `<meta property="og:image">` and `<meta name="twitter:image">`. |
-| `og` | One `<meta property="og:{key}">` per entry. |
-| `twitter` | One `<meta name="twitter:{key}">` per entry. |
-| `jsonLd` | `<script type="application/ld+json">`. |
+| Frontmatter    | Generated output                                                                      |
+| -------------- | ------------------------------------------------------------------------------------- |
+| `title`        | `<title>` and default description fallback.                                           |
+| `description`  | `<meta name="description">`.                                                          |
+| `canonical`    | `<link rel="canonical">`. Defaults to the generated route path.                       |
+| `robots`       | `<meta name="robots">`. Defaults to `index, follow`.                                  |
+| `image`        | `<meta property="og:image">` and `<meta name="twitter:image">`.                       |
+| `og`           | One `<meta property="og:{key}">` per entry.                                           |
+| `twitter`      | One `<meta name="twitter:{key}">` per entry.                                          |
+| `jsonLd`       | `<script type="application/ld+json">`.                                                |
 | `alternatives` | `<link rel="alternate" hreflang="{locale}" href="{route}">` for every locale variant. |
 
 The SSG plugin emits localized HTML files under:
@@ -682,21 +682,27 @@ The generated HTML for `/es/program` contains the localized route shell:
 ```html
 <!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Programa</title>
-  <meta name="description" content="Página de programa con frontmatter específico del componente.">
-  <link rel="canonical" href="/es/program">
-  <meta name="description" content="Página de programa con frontmatter específico del componente.">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="/es/program">
-  <link rel="alternate" hreflang="es" href="/es/program">
-  <link rel="alternate" hreflang="pt" href="/pt/program">
-</head>
-<body>
-  <div id="root"></div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Programa</title>
+    <meta
+      name="description"
+      content="Página de programa con frontmatter específico del componente."
+    />
+    <link rel="canonical" href="/es/program" />
+    <meta
+      name="description"
+      content="Página de programa con frontmatter específico del componente."
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="/es/program" />
+    <link rel="alternate" hreflang="es" href="/es/program" />
+    <link rel="alternate" hreflang="pt" href="/pt/program" />
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
 </html>
 ```
 
@@ -717,29 +723,29 @@ The generated sitemap uses the configured hostname and includes every public rou
 
 These items are intentionally called out because they affect how the current architecture should be understood.
 
-| Area | Current state |
-| --- | --- |
-| Default locale behavior | The default locale is still prefixed. There is no unprefixed default route such as `/about`. |
-| Fallback policy | `fallback` is typed but not implemented. Missing locale variants are reported as warnings or strict errors, but content fallback is not applied. |
-| Sitemap customization | `sitemap.changefreq` and `sitemap.priority` are typed but ignored. The sitemap always uses `weekly` and `0.8`. |
-| Robots customization | The `robots` option is typed but ignored. The plugin always emits `User-agent: *`, `Allow: /`, and the sitemap URL. |
-| Markdown rendering | Markdown is parsed but not transformed into HTML or React. Rendering is the application's responsibility. |
-| Static HTML generation | The plugin emits localized HTML shells, not fully server-rendered React page markup. |
-| HMR | Markdown edits rebuild the index, but the plugin does not explicitly add watch files or manually invalidate virtual modules. |
-| Component validation | Only top-level component files in configured directories are discovered. |
-| Direct `.md` imports | The `id` returned by direct Markdown imports is the file slug, not necessarily the frontmatter `id`. |
+| Area                    | Current state                                                                                                                                    |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Default locale behavior | The default locale is still prefixed. There is no unprefixed default route such as `/about`.                                                     |
+| Fallback policy         | `fallback` is typed but not implemented. Missing locale variants are reported as warnings or strict errors, but content fallback is not applied. |
+| Sitemap customization   | `sitemap.changefreq` and `sitemap.priority` are typed but ignored. The sitemap always uses `weekly` and `0.8`.                                   |
+| Robots customization    | The `robots` option is typed but ignored. The plugin always emits `User-agent: *`, `Allow: /`, and the sitemap URL.                              |
+| Markdown rendering      | Markdown is parsed but not transformed into HTML or React. Rendering is the application's responsibility.                                        |
+| Static HTML generation  | The plugin emits localized HTML shells, not fully server-rendered React page markup.                                                             |
+| HMR                     | Markdown edits rebuild the index, but the plugin does not explicitly add watch files or manually invalidate virtual modules.                     |
+| Component validation    | Only top-level component files in configured directories are discovered.                                                                         |
+| Direct `.md` imports    | The `id` returned by direct Markdown imports is the file slug, not necessarily the frontmatter `id`.                                             |
 
 ## 18. Build Commands
 
 The root workspace scripts are defined in [`package.json`](../package.json).
 
-| Command | Purpose |
-| --- | --- |
-| `npm run build:plugin` | Builds the plugin package with TypeScript into `packages/vite-plugin-flatwave-react/dist`. |
-| `npm run build:example` | Builds the example React site using the plugin. |
-| `npm run build` | Builds the plugin and then the example site. |
-| `npm run validate:example` | Runs the standalone validation CLI against the example content. |
-| `npm run test:e2e` | Builds the plugin and example, serves `dist`, and runs Vitest e2e checks. |
+| Command                    | Purpose                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------------ |
+| `npm run build:plugin`     | Builds the plugin package with TypeScript into `packages/vite-plugin-flatwave-react/dist`. |
+| `npm run build:example`    | Builds the example React site using the plugin.                                            |
+| `npm run build`            | Builds the plugin and then the example site.                                               |
+| `npm run validate:example` | Runs the standalone validation CLI against the example content.                            |
+| `npm run test:e2e`         | Builds the plugin and example, serves `dist`, and runs Vitest e2e checks.                  |
 
 ## 19. Summary
 

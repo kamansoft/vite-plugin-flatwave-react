@@ -1,6 +1,8 @@
 import { renderToString } from 'react-dom/server';
-import { getRoutes, getContent } from 'virtual:flatwave/content';
-import type { FlatwaveRoute, FlatwaveContentEntry } from 'vite-plugin-flatwave-react/types';
+import type {
+  FlatwaveRoute,
+  FlatwaveContentEntry,
+} from '@kamansoft/vite-plugin-flatwave-react/types';
 import { SimplePage } from './components/SimplePage';
 import { ProgramPage } from './components/ProgramPage';
 import MarkdownIt from 'markdown-it';
@@ -11,14 +13,17 @@ interface PageContext {
   locale: string;
   content: FlatwaveContentEntry;
   route: FlatwaveRoute;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   components: Record<string, React.ComponentType<any>>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const components: Record<string, React.ComponentType<any>> = {
   SimplePage,
   ProgramPage,
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function registerComponent(name: string, component: React.ComponentType<any>) {
   components[name] = component;
 }
@@ -27,7 +32,8 @@ export async function render(url: string, pageContext: PageContext): Promise<str
   const { route, content, locale, components: passedComponents } = pageContext;
 
   const componentRegistry = { ...components, ...passedComponents };
-  const Component = componentRegistry[content.component] || SimplePage;
+  const Component =
+    (content.component ? componentRegistry[content.component] : undefined) || SimplePage;
 
   const bodyHtml = md.render(content.body);
 
@@ -37,7 +43,9 @@ export async function render(url: string, pageContext: PageContext): Promise<str
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{route.metadata.title}</title>
-        {route.metadata.description && <meta name="description" content={route.metadata.description} />}
+        {route.metadata.description && (
+          <meta name="description" content={route.metadata.description} />
+        )}
         <link rel="canonical" href={route.metadata.canonical ?? route.path} />
         {renderHtmlHead(route)}
       </head>
@@ -77,7 +85,9 @@ function renderHtmlHead(route: FlatwaveRoute): string {
   }
 
   if (metadata.jsonLd) {
-    tags.push(`<script type="application/ld+json">${escapeJsonScript(JSON.stringify(metadata.jsonLd))}</script>`);
+    tags.push(
+      `<script type="application/ld+json">${escapeJsonScript(JSON.stringify(metadata.jsonLd))}</script>`
+    );
   }
 
   return tags.join('\n  ');

@@ -3,7 +3,13 @@ import type { RenderControllerOptions, SerializedPageContext } from './types.js'
 import { Navigation } from './navigation.js';
 import { ScrollManager } from './scroll-manager.js';
 import { getRoutes, getContent } from 'virtual:flatwave/content';
-import type { FlatwaveRoute, FlatwaveContentEntry, FlatwaveVirtualRoute, FlatwaveVirtualContent, SeoMetadata } from '../types';
+import type {
+  FlatwaveRoute,
+  FlatwaveContentEntry,
+  FlatwaveVirtualRoute,
+  FlatwaveVirtualContent,
+  SeoMetadata,
+} from '../types';
 
 function toFlatwaveRoute(virtualRoute: FlatwaveVirtualRoute): FlatwaveRoute {
   return {
@@ -48,7 +54,7 @@ export class RenderController {
     this.App = options.App;
     this.basePath = options.basePath ?? '';
     this.currentPath = this.getCurrentPathInternal();
-    
+
     this.scrollManager = new ScrollManager();
     this.navigation = new Navigation({
       basePath: this.basePath,
@@ -60,11 +66,12 @@ export class RenderController {
   start(): void {
     const initialPageContext = this.resolvePageContext(this.currentPath);
     this.currentPageContext = initialPageContext;
-    
-    this.root = hydrateRoot(document.getElementById('root')!, 
+
+    this.root = hydrateRoot(
+      document.getElementById('root')!,
       <this.App pageContext={initialPageContext} />
     );
-    
+
     this.navigation.start();
   }
 
@@ -79,7 +86,7 @@ export class RenderController {
   private resolvePageContext(path: string): SerializedPageContext {
     const routes = getRoutes();
     const virtualRoute = routes.find((r) => r.path === path) ?? routes[0];
-    
+
     if (!virtualRoute) {
       throw new Error(`No routes available`);
     }
@@ -101,7 +108,7 @@ export class RenderController {
 
   private async handleNavigation(path: string): Promise<void> {
     if (this.isRendering) return;
-    
+
     const validatedRoute = this.validateRoute(path);
     if (!validatedRoute) {
       console.warn(`[flatwave] Navigation rejected: unknown route "${path}"`);
@@ -109,19 +116,19 @@ export class RenderController {
     }
 
     this.isRendering = true;
-    
+
     try {
       this.scrollManager.saveScrollPosition(this.currentPath);
-      
+
       const pageContext = this.resolvePageContext(path);
-      
+
       this.updateDocumentHead(pageContext);
-      
+
       this.root!.render(<this.App pageContext={pageContext} />);
-      
+
       this.currentPath = path;
       this.currentPageContext = pageContext;
-      
+
       this.scrollManager.scrollToTop();
     } finally {
       this.isRendering = false;
@@ -130,7 +137,7 @@ export class RenderController {
 
   private async handlePopState(path: string): Promise<void> {
     if (this.isRendering) return;
-    
+
     const validatedRoute = this.validateRoute(path);
     if (!validatedRoute) {
       console.warn(`[flatwave] Popstate rejected: unknown route "${path}"`);
@@ -138,19 +145,19 @@ export class RenderController {
     }
 
     this.isRendering = true;
-    
+
     try {
       this.scrollManager.saveScrollPosition(this.currentPath);
-      
+
       const pageContext = this.resolvePageContext(path);
-      
+
       this.updateDocumentHead(pageContext);
-      
+
       this.root!.render(<this.App pageContext={pageContext} />);
-      
+
       this.currentPath = path;
       this.currentPageContext = pageContext;
-      
+
       this.scrollManager.restoreScrollPosition(path);
     } finally {
       this.isRendering = false;
@@ -165,9 +172,9 @@ export class RenderController {
 
   private updateDocumentHead(pageContext: SerializedPageContext): void {
     const { route } = pageContext;
-    
+
     document.title = route.metadata.title;
-    
+
     let descMeta = document.querySelector('meta[name="description"]');
     if (route.metadata.description) {
       if (!descMeta) {
@@ -199,8 +206,8 @@ export class RenderController {
   }
 
   private updateAlternateLinks(alternatives: Record<string, string>): void {
-    document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
-    
+    document.querySelectorAll('link[rel="alternate"][hreflang]').forEach((el) => el.remove());
+
     for (const [locale, href] of Object.entries(alternatives).sort()) {
       const link = document.createElement('link');
       link.setAttribute('rel', 'alternate');
@@ -211,8 +218,8 @@ export class RenderController {
   }
 
   private updateOgTags(og?: Record<string, string>): void {
-    document.querySelectorAll('meta[property^="og:"]').forEach(el => el.remove());
-    
+    document.querySelectorAll('meta[property^="og:"]').forEach((el) => el.remove());
+
     if (og) {
       for (const [property, value] of Object.entries(og)) {
         const meta = document.createElement('meta');
@@ -224,8 +231,8 @@ export class RenderController {
   }
 
   private updateTwitterTags(twitter?: Record<string, string>): void {
-    document.querySelectorAll('meta[name^="twitter:"]').forEach(el => el.remove());
-    
+    document.querySelectorAll('meta[name^="twitter:"]').forEach((el) => el.remove());
+
     if (twitter) {
       for (const [name, value] of Object.entries(twitter)) {
         const meta = document.createElement('meta');
@@ -237,8 +244,8 @@ export class RenderController {
   }
 
   private updateJsonLd(jsonLd?: unknown): void {
-    document.querySelectorAll('script[type="application/ld+json"]').forEach(el => el.remove());
-    
+    document.querySelectorAll('script[type="application/ld+json"]').forEach((el) => el.remove());
+
     if (jsonLd) {
       const script = document.createElement('script');
       script.setAttribute('type', 'application/ld+json');

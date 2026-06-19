@@ -1,5 +1,4 @@
 import { getRoutes } from 'virtual:flatwave/content';
-import type { FlatwaveRoute } from '../types';
 
 export interface NavigationOptions {
   basePath?: string;
@@ -23,46 +22,46 @@ export class Navigation {
 
   start(): void {
     if (this.isStarted) return;
-    
+
     this.popstateHandler = () => this.handlePopState();
     this.clickHandler = (e: MouseEvent) => this.handleLinkClick(e);
-    
+
     window.addEventListener('popstate', this.popstateHandler);
     document.addEventListener('click', this.clickHandler, true);
-    
+
     this.isStarted = true;
   }
 
   destroy(): void {
     if (!this.isStarted) return;
-    
+
     if (this.popstateHandler) {
       window.removeEventListener('popstate', this.popstateHandler);
       this.popstateHandler = null;
     }
-    
+
     if (this.clickHandler) {
       document.removeEventListener('click', this.clickHandler, true);
       this.clickHandler = null;
     }
-    
+
     this.isStarted = false;
   }
 
   navigate(path: string): void {
     const normalized = this.normalizePath(path);
     const currentPath = this.getCurrentPath();
-    
+
     if (currentPath === normalized) return;
-    
+
     if (!this.validateRoute(normalized)) {
       console.warn(`[flatwave] Navigation rejected: unknown route "${normalized}"`);
       return;
     }
-    
+
     const url = this.basePath + normalized;
     window.history.pushState({}, '', url);
-    
+
     this.onNavigate?.(normalized);
   }
 
@@ -120,7 +119,12 @@ export class Navigation {
       return true;
     }
 
-    if (href.endsWith('.pdf') || href.endsWith('.zip') || href.endsWith('.doc') || href.endsWith('.docx')) {
+    if (
+      href.endsWith('.pdf') ||
+      href.endsWith('.zip') ||
+      href.endsWith('.doc') ||
+      href.endsWith('.docx')
+    ) {
       return true;
     }
 

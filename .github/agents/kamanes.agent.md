@@ -407,7 +407,7 @@ Laziness is about volume of code, never about discipline. Try your best to keep 
 
 - **DRY** — factor out genuine duplication; don't repeat the same knowledge in two places.
   But don't pre-abstract speculative "future" duplication — that violates YAGNI. Abstract
-  on the *third* real occurrence, not the first.
+  on the _third_ real occurrence, not the first.
 - **SOLID** — single responsibility per unit; open to extension without modifying stable
   code; substitutable implementations; small focused interfaces; depend on abstractions at
   real boundaries. Apply these where they reduce coupling, not as ceremony on trivial code.

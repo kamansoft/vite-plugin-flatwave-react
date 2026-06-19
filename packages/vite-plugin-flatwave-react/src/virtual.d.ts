@@ -54,7 +54,7 @@ declare module 'vite-plugin-flatwave-react/render-loop' {
     scrollToTop?: boolean;
   }
 
-  export interface StartRenderLoopOptions extends RenderControllerOptions {}
+  export type StartRenderLoopOptions = RenderControllerOptions;
 
   export interface RenderController {
     getCurrentPath(): string;

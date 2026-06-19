@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { renderToString } from 'react-dom/server';
-import { getRoutes, getContent } from 'virtual:flatwave/content';
+
 import type { FlatwaveRoute, FlatwaveContentEntry } from 'vite-plugin-flatwave-react/types';
 
 interface PageContext {
@@ -26,7 +27,9 @@ export async function render(url: string, pageContext: PageContext): Promise<str
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{route.metadata.title}</title>
-        {route.metadata.description && <meta name="description" content={route.metadata.description} />}
+        {route.metadata.description && (
+          <meta name="description" content={route.metadata.description} />
+        )}
         <link rel="canonical" href={route.metadata.canonical ?? route.path} />
         {renderHtmlHead(route)}
       </head>
@@ -66,7 +69,9 @@ function renderHtmlHead(route: FlatwaveRoute): string {
   }
 
   if (metadata.jsonLd) {
-    tags.push(`<script type="application/ld+json">${escapeJsonScript(JSON.stringify(metadata.jsonLd))}</script>`);
+    tags.push(
+      `<script type="application/ld+json">${escapeJsonScript(JSON.stringify(metadata.jsonLd))}</script>`
+    );
   }
 
   return tags.join('\n  ');

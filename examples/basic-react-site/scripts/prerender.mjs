@@ -1,8 +1,8 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createPrerenderer } from 'vite-plugin-flatwave-react/render/server';
-import { buildIndex } from 'vite-plugin-flatwave-react/content/indexer';
+import { createPrerenderer } from '@kamansoft/vite-plugin-flatwave-react/render/server';
+import { buildIndex } from '@kamansoft/vite-plugin-flatwave-react/content/indexer';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..');
@@ -22,9 +22,9 @@ async function prerender() {
 
   const index = await buildIndex(options);
   const prerenderer = await createPrerenderer(options, index);
-  
+
   const results = await prerenderer.prerender(distDir);
-  
+
   for (const { path: fileName, html } of results) {
     const outputPath = path.resolve(distDir, fileName);
     await mkdir(path.dirname(outputPath), { recursive: true });

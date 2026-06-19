@@ -1,9 +1,9 @@
 ---
-title: "Início"
-slug: "index"
-id: "index"
-component: "SimplePage"
-description: "Página inicial"
+title: 'Início'
+slug: 'index'
+id: 'index'
+component: 'SimplePage'
+description: 'Página inicial'
 public: true
 ---
 

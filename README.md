@@ -75,15 +75,15 @@ export default defineConfig({
     react(),
     flatwaveContent({
       contentDir: path.resolve(__dirname, 'src/content'), // markdown files live here
-      locales: ['es', 'pt'],                               // supported languages
-      defaultLocale: 'es',                                 // must be included in locales
-      strictMissingLocales: false,                         // warn only; true = fail build
+      locales: ['es', 'pt'], // supported languages
+      defaultLocale: 'es', // must be included in locales
+      strictMissingLocales: false, // warn only; true = fail build
       componentsDir: path.resolve(__dirname, 'src/components'), // optional component validation
-      sitemap: { hostname: 'https://example.com' },       // used for sitemap.xml & robots.txt
-      
+      sitemap: { hostname: 'https://example.com' }, // used for sitemap.xml & robots.txt
+
       // Build-time pre-rendering (SSG) options
-      prerender: true,                                     // enable SSG pre-rendering
-      ssrEntry: 'src/entry-server.tsx',                   // custom SSR entry (optional)
+      prerender: true, // enable SSG pre-rendering
+      ssrEntry: 'src/entry-server.tsx', // custom SSR entry (optional)
     }),
   ],
 });
@@ -96,11 +96,11 @@ export default defineConfig({
 flatwaveContent({
   // ...other options
   prerender: {
-    routes: ['/es/', '/es/about'],        // explicit routes to pre-render (optional)
-    exclude: ['/admin/*'],                // glob patterns to skip (optional)
-    stream: true,                         // use streaming render (optional)
+    routes: ['/es/', '/es/about'], // explicit routes to pre-render (optional)
+    exclude: ['/admin/*'], // glob patterns to skip (optional)
+    stream: true, // use streaming render (optional)
   },
-  ssrEntry: 'src/entry-server.tsx',      // SSR entry point
+  ssrEntry: 'src/entry-server.tsx', // SSR entry point
 });
 ```
 
@@ -129,15 +129,15 @@ Each `.md` file must contain at least the **baseline front‑matter** fields:
 
 ```yaml
 ---
-title: "Page title"
-slug: "page-slug"          # URL segment, without leading slash
-id: "unique-id"            # groups translations together
-component: "SimplePage"    # React component name (must exist under componentsDir)
-public: true               # false → omitted from route manifest / sitemap
-description: "Short description"
-canonical: "/es/page-slug" # optional, defaults to locale‑prefixed route
-robots: "index, follow"
-keywords: [ "tag1", "tag2" ]
+title: 'Page title'
+slug: 'page-slug' # URL segment, without leading slash
+id: 'unique-id' # groups translations together
+component: 'SimplePage' # React component name (must exist under componentsDir)
+public: true # false → omitted from route manifest / sitemap
+description: 'Short description'
+canonical: '/es/page-slug' # optional, defaults to locale‑prefixed route
+robots: 'index, follow'
+keywords: ['tag1', 'tag2']
 # Any additional keys are preserved in `attributes` and forwarded to the component
 ---
 Markdown body (GitHub‑flavoured, no MDX in v1)
@@ -175,7 +175,11 @@ import { MarkdownRenderer } from './components/MarkdownRenderer';
 import { ProgramPage } from './components/ProgramPage';
 import { SimplePage } from './components/SimplePage';
 
-export function App({ pageContext }: { pageContext: { locale: string; content: any; route: any } }) {
+export function App({
+  pageContext,
+}: {
+  pageContext: { locale: string; content: any; route: any };
+}) {
   const { content } = pageContext;
 
   const Component = content.component === 'ProgramPage' ? ProgramPage : SimplePage;
@@ -194,16 +198,17 @@ export function App({ pageContext }: { pageContext: { locale: string; content: a
 
 ```ts
 import {
-  startRenderLoop,      // Initialize render controller, hydrate #root
-  navigateTo,           // Imperative navigation
-  getCurrentPath,       // Get current route path
-  onNavigate,           // Subscribe to navigation events
-  getPageContext,       // Get current page context
-  useFlatwaveRoute,     // React hook for current route
+  startRenderLoop, // Initialize render controller, hydrate #root
+  navigateTo, // Imperative navigation
+  getCurrentPath, // Get current route path
+  onNavigate, // Subscribe to navigation events
+  getPageContext, // Get current page context
+  useFlatwaveRoute, // React hook for current route
 } from 'vite-plugin-flatwave-react/render-loop';
 ```
 
 **Key behaviors:**
+
 - **Pathname routing only** — `/es/about`, `/pt/program` (no hash routing)
 - **No client data fetching** — uses serialized route inventory from virtual module
 - **Manual scroll restoration** — save before navigation, restore on back/forward
@@ -217,7 +222,7 @@ import {
 When `prerender: true` is enabled, the plugin performs a **two-step build** to generate fully pre-rendered static HTML:
 
 1. **Client build** (`vite build`) — produces client bundle and static assets
-2. **SSR build** (`vite build --ssr src/entry-server.tsx`) — produces server bundle  
+2. **SSR build** (`vite build --ssr src/entry-server.tsx`) — produces server bundle
 3. **Pre-render script** — loads SSR bundle, renders each route, writes static HTML
 
 ### SSR Entry (`src/entry-server.tsx`)
@@ -252,7 +257,7 @@ export async function render(url: string, pageContext: PageContext): Promise<str
   const { route, content, locale, components: passedComponents } = pageContext;
   const componentRegistry = { ...components, ...passedComponents };
   const Component = componentRegistry[content.component] || SimplePage;
-  
+
   const bodyHtml = md.render(content.body);
 
   const App = () => (
@@ -261,7 +266,9 @@ export async function render(url: string, pageContext: PageContext): Promise<str
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{route.metadata.title}</title>
-        {route.metadata.description && <meta name="description" content={route.metadata.description} />}
+        {route.metadata.description && (
+          <meta name="description" content={route.metadata.description} />
+        )}
         <link rel="canonical" href={route.metadata.canonical ?? route.path} />
         {renderHtmlHead(route)}
       </head>
@@ -319,9 +326,9 @@ async function prerender() {
 
   const index = await buildIndex(options);
   const prerenderer = await createPrerenderer(options, index);
-  
+
   const results = await prerenderer.prerender(distDir);
-  
+
   for (const { path: fileName, html } of results) {
     await mkdir(path.dirname(outputPath), { recursive: true });
     await writeFile(outputPath, html);
@@ -370,15 +377,15 @@ dist/
 
 ## Development Workflow (Monorepo)
 
-| Command | What it does |
-|---------|---------------|
-| `npm run build:plugin` | `tsc` compiles `packages/vite-plugin-flatwave-react` → `dist/` |
-| `npm run build:example` | Builds the React example (`examples/basic-react-site`) using the local plugin |
-| `npm run build` | Runs both of the above |
-| `npm run validate:example` | Executes the standalone validation CLI against the example content |
-| `npm run test:e2e` | Builds everything, starts a static `serve` on `dist/`, runs Vitest e2e checks |
-| `npm run dev -w @flatwave/example-basic-react-site` | Starts Vite dev server for the example (port 8080) |
-| `npm run preview -w @flatwave/example-basic-react-site` | Serves the production build (`dist/`) on port 4173 |
+| Command                                                 | What it does                                                                  |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `npm run build:plugin`                                  | `tsc` compiles `packages/vite-plugin-flatwave-react` → `dist/`                |
+| `npm run build:example`                                 | Builds the React example (`examples/basic-react-site`) using the local plugin |
+| `npm run build`                                         | Runs both of the above                                                        |
+| `npm run validate:example`                              | Executes the standalone validation CLI against the example content            |
+| `npm run test:e2e`                                      | Builds everything, starts a static `serve` on `dist/`, runs Vitest e2e checks |
+| `npm run dev -w @flatwave/example-basic-react-site`     | Starts Vite dev server for the example (port 8080)                            |
+| `npm run preview -w @flatwave/example-basic-react-site` | Serves the production build (`dist/`) on port 4173                            |
 
 All commands are defined in the **root `package.json`** (workspace scripts).
 
@@ -396,10 +403,11 @@ npm run dev -w @flatwave/example-basic-react-site
 ```
 
 The example demonstrates:
-- locale‑prefixed routes (`/es/`, `/pt/about`, …)  
-- browser language detection redirect from `/`  
-- `LanguageSwitcher` built from `getAlternatives()`  
-- `react-markdown` rendering via `MarkdownRenderer`  
+
+- locale‑prefixed routes (`/es/`, `/pt/about`, …)
+- browser language detection redirect from `/`
+- `LanguageSwitcher` built from `getAlternatives()`
+- `react-markdown` rendering via `MarkdownRenderer`
 - SEO tags, `sitemap.xml`, `robots.txt`, `route-manifest.json` generated at build time
 - **Build-time pre-rendering with full React hydration**
 - **Client-side navigation without full page reloads**
@@ -424,12 +432,12 @@ docker compose -f docker/docker-compose.yml up static
 
 **Files**
 
-| File | Purpose |
-|------|---------|
+| File                        | Purpose                                        |
+| --------------------------- | ---------------------------------------------- |
 | `docker/docker-compose.yml` | Orchestrates `dev`, `build`, `static` services |
-| `docker/dev.Dockerfile` | Installs deps, runs `npm run dev` |
-| `docker/build.Dockerfile` | Installs deps, runs `npm run build` |
-| `docker/nginx.conf` | SPA fallback + static file serving |
+| `docker/dev.Dockerfile`     | Installs deps, runs `npm run dev`              |
+| `docker/build.Dockerfile`   | Installs deps, runs `npm run build`            |
+| `docker/nginx.conf`         | SPA fallback + static file serving             |
 
 The same stack is used by the **e2e test** (`npm run test:e2e`) to guarantee that the produced `dist/` works behind a real static server.
 
@@ -448,8 +456,8 @@ node packages/vite-plugin-flatwave-react/dist/cli/validate.js \
   --strict-missing   # optional: turn missing‑locale warnings into errors
 ```
 
-*Exit code 0* → validation passed (warnings printed to stderr).  
-*Exit code 1* → errors found (or strict‑missing triggered).
+_Exit code 0_ → validation passed (warnings printed to stderr).  
+_Exit code 1_ → errors found (or strict‑missing triggered).
 
 The CLI re‑uses the exact same validator the Vite plugin runs at `buildStart`, guaranteeing parity between CI and local dev.
 
@@ -501,9 +509,9 @@ vite-plugin-flatwave-react/
 
 ## Contributing / Extending
 
-1. **Add a new locale** – drop a folder under `src/content/<locale>/` and add the locale to `locales` in `vite.config.ts`.  
-2. **New component** – create `src/components/MyComponent.tsx`, reference it in front‑matter (`component: "MyComponent"`).  
-3. **Extra front‑matter** – any key not in the baseline list is kept in `attributes` and passed to the component; no schema changes required.  
+1. **Add a new locale** – drop a folder under `src/content/<locale>/` and add the locale to `locales` in `vite.config.ts`.
+2. **New component** – create `src/components/MyComponent.tsx`, reference it in front‑matter (`component: "MyComponent"`).
+3. **Extra front‑matter** – any key not in the baseline list is kept in `attributes` and passed to the component; no schema changes required.
 4. **Custom SSG adapter** – the plugin emits a `route-manifest.json`; write a small script that reads it and renders HTML with your favourite framework (the built‑in SSG is a tiny Vite‑native static generator, but the inventory is adapter‑neutral).
 
 ---

@@ -36,8 +36,12 @@ export async function loadTemplate(templatePath?: string): Promise<string> {
 
 export function extractAssets(html: string | undefined): TemplateAssets {
   if (!html) return { scripts: [], styles: [] };
-  const scripts = [...html.matchAll(/<script[^>]+src="([^"]+\.js)"[^>]*>/g)].map((match) => match[1]);
-  const styles = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+\.css)"[^>]*>/g)].map((match) => match[1]);
+  const scripts = [...html.matchAll(/<script[^>]+src="([^"]+\.js)"[^>]*>/g)].map(
+    (match) => match[1]
+  );
+  const styles = [
+    ...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+\.css)"[^>]*>/g),
+  ].map((match) => match[1]);
   return { scripts, styles };
 }
 
@@ -52,7 +56,9 @@ export function injectPreRenderedHtml(
   route: { locale: string; metadata: { title: string; canonical?: string } },
   assets: TemplateAssets
 ): string {
-  const scripts = assets.scripts.map((src) => `<script type="module" crossorigin src="${src}"></script>`).join('\n');
+  const scripts = assets.scripts
+    .map((src) => `<script type="module" crossorigin src="${src}"></script>`)
+    .join('\n');
   const styles = assets.styles.map((href) => `<link rel="stylesheet" href="${href}">`).join('\n');
 
   const fullHtml = preRenderedHtml
@@ -68,7 +74,9 @@ export function renderHtmlShell(
   assets: TemplateAssets,
   appHtml?: string
 ): string {
-  const scripts = assets.scripts.map((src) => `<script type="module" crossorigin src="${src}"></script>`).join('\n');
+  const scripts = assets.scripts
+    .map((src) => `<script type="module" crossorigin src="${src}"></script>`)
+    .join('\n');
   const styles = assets.styles.map((href) => `<link rel="stylesheet" href="${href}">`).join('\n');
 
   let result = template
@@ -91,10 +99,12 @@ export function injectIntoTemplate(
   route: { locale: string; metadata: { title: string; canonical?: string } },
   assets: TemplateAssets
 ): string {
-  const scripts = assets.scripts.map((src) => `<script type="module" crossorigin src="${src}"></script>`).join('\n');
+  const scripts = assets.scripts
+    .map((src) => `<script type="module" crossorigin src="${src}"></script>`)
+    .join('\n');
   const styles = assets.styles.map((href) => `<link rel="stylesheet" href="${href}">`).join('\n');
-  
-  let result = template
+
+  const result = template
     .replace(/{{appHtml}}/g, appHtml)
     .replace(/{{scripts}}/g, scripts)
     .replace(/{{styles}}/g, styles)
@@ -108,9 +118,11 @@ export function injectIntoTemplate(
 export function renderRouteHtml(
   route: FlatwaveRoute,
   assets: TemplateAssets,
-  content?: FlatwaveContentEntry
+  _content?: FlatwaveContentEntry
 ): string {
-  const scripts = assets.scripts.map((src) => `<script type="module" crossorigin src="${src}"></script>`).join('\n');
+  const scripts = assets.scripts
+    .map((src) => `<script type="module" crossorigin src="${src}"></script>`)
+    .join('\n');
   const styles = assets.styles.map((href) => `<link rel="stylesheet" href="${href}">`).join('\n');
   const title = route.metadata.title;
   const description = route.metadata.description ? route.metadata.description : title;

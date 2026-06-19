@@ -4,9 +4,15 @@ import { buildIndex } from './content/indexer.js';
 import { validateContent } from './content/validator.js';
 import { parseMarkdown } from './content/parser.js';
 import { routeForLocaleSlug } from './content/scanner.js';
-import { escapeHtml, escapeXml, renderHtmlHead } from './seo/metadata.js';
-import { createPrerenderer, loadTemplate, extractAssets, injectPreRenderedHtml, injectPageContextScript, renderRouteHtml } from './render/server.js';
-import type { FlatwaveContentEntry, FlatwaveContentIndex, FlatwaveContentOptions, FlatwaveRoute, NormalizedOptions, PrerenderOptions } from './types';
+import { escapeXml } from './seo/metadata.js';
+import { createPrerenderer, extractAssets, renderRouteHtml } from './render/server.js';
+import type {
+  FlatwaveContentIndex,
+  FlatwaveContentOptions,
+  FlatwaveRoute,
+  NormalizedOptions,
+  PrerenderOptions,
+} from './types';
 
 const VIRTUAL_ID = '\0virtual:flatwave/content';
 const PUBLIC_VIRTUAL_ID = 'virtual:flatwave/content';
@@ -53,21 +59,27 @@ export async function flatwaveContent(options: FlatwaveContentOptions): Promise<
       if (!id.endsWith('.md')) return null;
       const source = await readFile(id);
       const parsed = parseMarkdown(source);
-      const locale = inferLocale(id, normalizedOptions.contentDir, normalizedOptions.locales) ?? normalizedOptions.defaultLocale;
+      const locale =
+        inferLocale(id, normalizedOptions.contentDir, normalizedOptions.locales) ??
+        normalizedOptions.defaultLocale;
       const slug = path.basename(id, '.md');
       const route = routeForLocaleSlug(locale, slug);
       const idValue = slug;
 
-      return `export default ${JSON.stringify({
-        body: parsed.body,
-        attributes: parsed.attributes,
-        frontmatter: parsed.frontmatter,
-        locale,
-        slug,
-        id: idValue,
-        route,
-        file: id,
-      }, null, 2)};`;
+      return `export default ${JSON.stringify(
+        {
+          body: parsed.body,
+          attributes: parsed.attributes,
+          frontmatter: parsed.frontmatter,
+          locale,
+          slug,
+          id: idValue,
+          route,
+          file: id,
+        },
+        null,
+        2
+      )};`;
     },
   };
 
@@ -90,7 +102,10 @@ export async function flatwaveContent(options: FlatwaveContentOptions): Promise<
         this.emitFile({
           type: 'asset',
           fileName: 'sitemap.xml',
-          source: renderSitemap(routes, normalizedOptions.sitemap?.hostname ?? 'http://localhost:4173'),
+          source: renderSitemap(
+            routes,
+            normalizedOptions.sitemap?.hostname ?? 'http://localhost:4173'
+          ),
         });
       }
 
@@ -124,7 +139,7 @@ export async function createPrerenderPlugin(
   index: FlatwaveContentIndex
 ): Promise<Plugin> {
   const prerenderOptions = normalizePrerenderOptions(options.prerender);
-  
+
   if (!prerenderOptions) {
     return {
       name: 'flatwave-react:prerender',
@@ -139,15 +154,15 @@ export async function createPrerenderPlugin(
   return {
     name: 'flatwave-react:prerender',
     enforce: 'post',
-    async generateBundle(_, bundle) {
+    async generateBundle(_) {
       if (skipBuiltinPrerender) {
         return;
       }
-      
+
       const prerenderer = await createPrerenderer(options, index);
       const outputDir = process.cwd() + '/dist';
       const results = await prerenderer.prerender(outputDir);
-      
+
       for (const { path: fileName, html } of results) {
         this.emitFile({
           type: 'asset',
@@ -164,9 +179,8 @@ function normalizeOptions(options: FlatwaveContentOptions): NormalizedOptions {
     throw new Error(`defaultLocale '${options.defaultLocale}' must be included in locales.`);
   }
 
-  const renderLoop = options.renderLoop === undefined && options.prerender
-    ? { enabled: true }
-    : options.renderLoop;
+  const renderLoop =
+    options.renderLoop === undefined && options.prerender ? { enabled: true } : options.renderLoop;
 
   return {
     ...options,
@@ -241,7 +255,13 @@ function inferLocale(file: string, contentDir: string, locales: string[]): strin
 
 function findIndexHtml(bundle: Record<string, unknown>): string | undefined {
   for (const item of Object.values(bundle)) {
-    if (item && typeof item === 'object' && 'fileName' in item && item.fileName === 'index.html' && 'source' in item) {
+    if (
+      item &&
+      typeof item === 'object' &&
+      'fileName' in item &&
+      item.fileName === 'index.html' &&
+      'source' in item
+    ) {
       return String((item as { source?: unknown }).source);
     }
   }
@@ -271,7 +291,9 @@ Sitemap: ${base}/sitemap.xml
 `;
 }
 
-function normalizePrerenderOptions(prerender: NormalizedOptions['prerender']): PrerenderOptions | true | false | undefined {
+function normalizePrerenderOptions(
+  prerender: NormalizedOptions['prerender']
+): PrerenderOptions | true | false | undefined {
   if (!prerender) return undefined;
   if (prerender === true) return {};
   return prerender;

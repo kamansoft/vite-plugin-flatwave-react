@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { filterRoutesForPrerender } from '../../../src/render/page.js';
-import type { FlatwaveRoute, FlatwaveContentIndex, NormalizedOptions } from '../../../src/types.js';
+import type { FlatwaveRoute, NormalizedOptions } from '../../../src/types.js';
 
 describe('prerender/renderer', () => {
   let mockRoutes: FlatwaveRoute[];
@@ -31,7 +31,12 @@ describe('prerender/renderer', () => {
         contentId: 'program',
         component: 'ProgramPage',
         metadata: { title: 'Programa', description: 'Página del programa' },
-        frontmatter: { title: 'Programa', slug: 'program', id: 'program', component: 'ProgramPage' },
+        frontmatter: {
+          title: 'Programa',
+          slug: 'program',
+          id: 'program',
+          component: 'ProgramPage',
+        },
         alternatives: { pt: '/pt/program' },
       },
       {
@@ -65,7 +70,7 @@ describe('prerender/renderer', () => {
       };
       const result = filterRoutesForPrerender(mockRoutes, options);
       expect(result).toHaveLength(2);
-      expect(result.map(r => r.path)).toEqual(['/es/', '/es/about']);
+      expect(result.map((r) => r.path)).toEqual(['/es/', '/es/about']);
     });
 
     it('should filter routes by explicit routes array', () => {
@@ -74,16 +79,16 @@ describe('prerender/renderer', () => {
       };
       const result = filterRoutesForPrerender(mockRoutes, options);
       expect(result).toHaveLength(2);
-      expect(result.map(r => r.path)).toEqual(['/es/', '/es/about']);
+      expect(result.map((r) => r.path)).toEqual(['/es/', '/es/about']);
     });
 
     it('should filter routes by function', () => {
       const options: NormalizedOptions['prerender'] = {
-        routes: (routes) => routes.filter(r => r.locale === 'es').map(r => r.path),
+        routes: (routes) => routes.filter((r) => r.locale === 'es').map((r) => r.path),
       };
       const result = filterRoutesForPrerender(mockRoutes, options);
       expect(result).toHaveLength(3);
-      expect(result.every(r => r.locale === 'es')).toBe(true);
+      expect(result.every((r) => r.locale === 'es')).toBe(true);
     });
 
     it('should return empty array when prerender is false', () => {

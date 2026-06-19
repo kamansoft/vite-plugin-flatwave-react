@@ -31,6 +31,7 @@ describe('Flatwave example e2e', () => {
   beforeAll(() => {
     execFileSync('npm', ['run', 'build', '-w', pluginWorkspace], { cwd: root, stdio: 'pipe' });
     execFileSync('npm', ['run', 'build', '-w', exampleWorkspace], { cwd: root, stdio: 'pipe' });
+    execFileSync('npm', ['run', 'prerender', '-w', exampleWorkspace], { cwd: root, stdio: 'pipe' });
     serve = spawn('npx', ['serve', 'dist', '-l', '4173'], {
       cwd: path.resolve(root, 'examples/basic-react-site'),
       stdio: 'pipe',

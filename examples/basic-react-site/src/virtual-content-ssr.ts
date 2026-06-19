@@ -1,7 +1,7 @@
 // This file provides the virtual:flatwave/content API for SSR builds
 // It's used as an alias replacement for the virtual module in SSR builds
 
-import { buildIndex } from 'vite-plugin-flatwave-react/content/indexer.js';
+import { buildIndex } from '@kamansoft/vite-plugin-flatwave-react/content/indexer.js';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 

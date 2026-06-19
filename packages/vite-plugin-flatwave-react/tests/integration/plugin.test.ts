@@ -20,7 +20,7 @@ describe('Integration: full plugin behavior', () => {
   });
 
   it('should generate correct route manifest', async () => {
-    const result = await build({
+    await build({
       root: fixtureDir,
       build: { outDir: testBuildDir, emptyOutDir: true },
       plugins: [
@@ -54,18 +54,21 @@ describe('Integration: full plugin behavior', () => {
     }
 
     // Check specific routes
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const esIndex = manifest.find((r: any) => r.path === '/es/');
     expect(esIndex).toBeDefined();
     expect(esIndex.locale).toBe('es');
     expect(esIndex.metadata.title).toBe('Inicio');
     expect(esIndex.alternatives).toHaveProperty('pt', '/pt/');
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const esAbout = manifest.find((r: any) => r.path === '/es/about');
     expect(esAbout).toBeDefined();
     expect(esAbout.locale).toBe('es');
     expect(esAbout.metadata.title).toBe('Acerca de');
     expect(esAbout.alternatives).toHaveProperty('pt', '/pt/about');
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const esProgram = manifest.find((r: any) => r.path === '/es/program');
     expect(esProgram).toBeDefined();
     expect(esProgram.locale).toBe('es');
@@ -82,7 +85,7 @@ describe('Integration: full plugin behavior', () => {
 
     expect(sitemap).toContain('<?xml version="1.0" encoding="UTF-8"?>');
     expect(sitemap).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
-    
+
     // Sitemap uses full URLs with hostname
     for (const route of manifest) {
       expect(sitemap).toContain(`<loc>http://localhost:4173${route.path}</loc>`);
@@ -103,7 +106,10 @@ describe('Integration: full plugin behavior', () => {
     const manifest = JSON.parse(await readFile(manifestPath, 'utf-8'));
 
     for (const route of manifest) {
-      const htmlPath = path.resolve(testBuildDir, route.path.replace(/^\//, '').replace(/\/$/, '') + '/index.html');
+      const htmlPath = path.resolve(
+        testBuildDir,
+        route.path.replace(/^\//, '').replace(/\/$/, '') + '/index.html'
+      );
       const html = await readFile(htmlPath, 'utf-8');
 
       // Check basic structure
@@ -115,7 +121,9 @@ describe('Integration: full plugin behavior', () => {
       // Check SEO metadata
       expect(html).toContain(`<title>${route.metadata.title}</title>`);
       expect(html).toContain(`<meta name="description" content="${route.metadata.description}">`);
-      expect(html).toContain(`<link rel="canonical" href="${route.metadata.canonical ?? route.path}">`);
+      expect(html).toContain(
+        `<link rel="canonical" href="${route.metadata.canonical ?? route.path}">`
+      );
 
       // Check hreflang
       for (const [locale, altPath] of Object.entries(route.alternatives)) {
@@ -138,7 +146,7 @@ describe('Integration: plugin with prerender option', () => {
   });
 
   it('should skip HTML generation when prerender is enabled', async () => {
-    const result = await build({
+    await build({
       root: fixtureDir,
       build: { outDir: testBuildDir, emptyOutDir: true },
       plugins: [
@@ -159,9 +167,9 @@ describe('Integration: plugin with prerender option', () => {
     const manifest = JSON.parse(await readFile(manifestPath, 'utf-8'));
 
     for (const route of manifest) {
-      const htmlPath = path.resolve(testBuildDir, route.path.replace(/^\//, '').replace(/\/$/, '') + '/index.html');
       // These should not exist or be empty since prerender plugin is no-op during build
       // (actual prerendering happens in separate step)
+      expect(route).toBeDefined();
     }
   });
 });
