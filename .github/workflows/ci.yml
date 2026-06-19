@@ -3,8 +3,11 @@ name: CI Validation
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [main]
+  # push: branches: [main] is intentionally removed.
+  # The release.yml workflow contains its own CI gate job that runs first,
+  # so running CI twice on every merge is redundant. Branch protection rules
+  # (required status checks) enforce that this job passes before any PR can
+  # be merged, which is the primary quality gate.
 
 permissions:
   contents: read
@@ -38,7 +41,6 @@ jobs:
           HUSKY: 0
 
   test-matrix:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     strategy:
       matrix:

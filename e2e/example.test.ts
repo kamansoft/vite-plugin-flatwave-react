@@ -4,7 +4,7 @@ import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const root = process.cwd();
-const pluginWorkspace = 'vite-plugin-flatwave-react';
+const pluginWorkspace = '@kamansoft/vite-plugin-flatwave-react';
 const exampleWorkspace = '@flatwave/example-basic-react-site';
 const exampleDist = path.resolve(root, 'examples/basic-react-site/dist');
 let serve: ChildProcessWithoutNullStreams | undefined;

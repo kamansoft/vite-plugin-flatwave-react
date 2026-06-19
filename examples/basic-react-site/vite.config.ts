@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
-import { flatwaveContent } from 'vite-plugin-flatwave-react';
+import { flatwaveContent } from '@kamansoft/vite-plugin-flatwave-react';
 
 export default defineConfig({
   plugins: [
