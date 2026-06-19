@@ -5,25 +5,75 @@ on:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: write # @semantic-release/github: create the GitHub Release and git tag
-  issues: write # @semantic-release/github: comment on released issues
-  pull-requests: write # @semantic-release/github: comment on released pull requests
+# Prevent simultaneous releases from racing each other.
+# cancel-in-progress: false ensures an in-flight release is never killed mid-run.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  release:
+  # ─── 1. CI gate ────────────────────────────────────────────────────────────
+  # Re-run the full validation suite on main before releasing.
+  # Branch protection (required status checks on PRs) is the primary guard,
+  # but this job provides a hard stop inside the release workflow itself.
+  ci:
+    name: CI Validation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # full history + tags so semantic-release can analyze commits
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          HUSKY: 0
+
+      - name: Run full validation
+        run: npm run validate
+        env:
+          HUSKY: 0
+
+  # ─── 2. Release & publish ──────────────────────────────────────────────────
+  release:
+    name: Release & Publish to npm
+    needs: [ci] # only runs after CI passes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the GitHub Release and git tag
+      id-token: write # npm OIDC trusted publishing + package provenance
+      issues: write # let semantic-release comment on released issues
+      pull-requests: write # let semantic-release comment on released PRs
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history + all tags — required by semantic-release
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          # IMPORTANT: registry-url is intentionally NOT set here.
+          # When registry-url is present, setup-node writes an .npmrc that
+          # references ${NODE_AUTH_TOKEN}. That file conflicts with
+          # @semantic-release/npm's own auth setup and causes
+          # EINVALIDNPMTOKEN errors even with a valid token.
+          # Reference: https://semantic-release.gitbook.io/semantic-release/recipes/ci-configurations/github-actions
+
+      - name: Upgrade npm to latest
+        # npm >=11.5.1 is required for OIDC trusted publishing.
+        # Node 22 ships with npm 10.x, so we upgrade before proceeding.
+        run: npm install -g npm@latest
 
       - name: Show toolchain versions
         run: node -v && npm -v
@@ -40,6 +90,15 @@ jobs:
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # NPM_TOKEN is read directly by @semantic-release/npm to create a
+          # temporary .npmrc for authentication. This is separate from
+          # NODE_AUTH_TOKEN (which is used by the npm CLI when registry-url
+          # is set in setup-node — we don't use that pattern here).
+          #
+          # Future upgrade path — npm OIDC trusted publishing:
+          #   Once the trusted publisher is configured on npmjs.com for this
+          #   package (see docs/ci-cd-release-automation.md), NPM_TOKEN can
+          #   be removed from this env block entirely. The id-token: write
+          #   permission above will cause npm >=11.5.1 to authenticate via
+          #   OIDC automatically, with no long-lived secret needed.
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_REGISTRY: https://registry.npmjs.org

@@ -1,5 +1,5 @@
 {
-  "name": "vite-plugin-flatwave-react",
+  "name": "@kamansoft/vite-plugin-flatwave-react",
   "version": "0.1.0",
   "description": "Vite content plugin for Markdown-driven, i18n-aware static React sites.",
   "type": "module",
