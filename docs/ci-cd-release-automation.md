@@ -1,9 +1,10 @@
 # CI/CD & Release Automation
 
-> **Current state (2026-06-19):** Pipeline is fully operational.
+> **Current state (2026-06-19):** Pipeline is fully operational and fully locked.
 > `@kamansoft/vite-plugin-flatwave-react@1.1.0` was the first version published
 > automatically by GitHub Actions using npm OIDC trusted publishing — no tokens
-> stored anywhere.
+> stored anywhere. `main` cannot receive direct pushes from anyone, including
+> org admins (`enforce_admins: true`, `allow_force_pushes: false`).
 
 ---
 
@@ -713,6 +714,44 @@ git checkout main && git pull origin main
 git cherry-pick feat/publish-to-npm   # the OIDC commit
 git push origin main
 # → remote: Bypassed rule violations for refs/heads/main
+
+# ── Lock main for everyone including admins (run after all PRs pass) ──────────
+# Final branch protection: enforce_admins: true prevents ALL direct pushes,
+# including org admins. This is the definitive locked state.
+gh api repos/kamansoft/vite-plugin-flatwave-react/branches/main/protection \
+  --method PUT \
+  --header "Accept: application/vnd.github+json" \
+  --input - <<'EOF'
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ["validate", "test-matrix (22)", "test-matrix (24)", "Validate PR Title"]
+  },
+  "enforce_admins": true,
+  "required_pull_request_reviews": {
+    "required_approving_review_count": 0,
+    "dismiss_stale_reviews": true
+  },
+  "restrictions": null,
+  "allow_force_pushes": false,
+  "allow_deletions": false
+}
+EOF
+# enforce_admins: true  → no one can push directly to main, not even org admins
+# allow_force_pushes: false → history cannot be rewritten under any circumstance
+
+# ── Retarget orphaned release tag after force-reset of main ───────────────────
+# When main was force-reset to undo direct-push commits and they were re-landed
+# via a proper PR, the vX.Y.Z tag created by the failed release run was left
+# pointing to a commit outside main's new ancestry. semantic-release then failed
+# with "exit code 128: git tag vX.Y.Z" (tag already exists).
+# Fix: delete the stale tag and recreate it on the current main HEAD so
+# semantic-release finds the tag in ancestry and reports "no relevant changes".
+git fetch --tags
+git push origin --delete v1.1.0     # remove stale tag from remote
+git tag -d v1.1.0                   # remove stale tag locally
+git tag v1.1.0 <main-HEAD-sha>      # recreate on current main HEAD
+git push origin v1.1.0              # push corrected tag
 
 # ── Verify final published version ───────────────────────────────────────────
 npm view @kamansoft/vite-plugin-flatwave-react versions --json
