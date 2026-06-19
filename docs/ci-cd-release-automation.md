@@ -1,10 +1,9 @@
 # CI/CD & Release Automation
 
-> **Current state (2026-06-19):** Pipeline is fully operational and fully locked.
+> **Current state (2026-06-19):** Pipeline is fully operational.
 > `@kamansoft/vite-plugin-flatwave-react@1.1.0` was the first version published
 > automatically by GitHub Actions using npm OIDC trusted publishing — no tokens
-> stored anywhere. `main` cannot receive direct pushes from anyone, including
-> org admins (`enforce_admins: true`, `allow_force_pushes: false`).
+> stored anywhere.
 
 ---
 
@@ -18,43 +17,6 @@
 6. [Workflow files reference](#6-workflow-files-reference)
 7. [Commands executed](#7-commands-executed)
 8. [Troubleshooting](#8-troubleshooting)
-
----
-
-## How the PR title gates the version bump (end-to-end)
-
-This is the critical chain that ties PR titles to semantic versioning:
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  1. PR title  ──►  2. Validation  ──►  3. Squash merge  ──►  4. Release     │
-│                                                                             │
-│  feat(x): add y      PASS / FAIL       commit msg =        minor bump       │
-│                       (blocks merge)   "feat(x): add y"    1.1.0 → 1.2.0   │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-**Step 1 — PR title** is the single source of truth for what version bump will happen.
-
-**Step 2 — `Validate PR Title` check** (GitHub Actions, `pr-title.yml`) runs
-immediately on every PR open/edit. If the title does not match Conventional
-Commits format, the check **fails and the merge button is locked** — branch
-protection requires this check to be green.
-
-**Step 3 — Squash merge** is the **only allowed merge strategy** (merge commits
-and rebase are disabled). GitHub is configured to use `PR_TITLE` as the squash
-commit title, so the validated PR title becomes the commit that lands on `main`,
-word for word.
-
-**Step 4 — `semantic-release`** reads that commit on `main`, maps the type to a
-semver bump, and publishes:
-
-| PR title starts with                                | Semver bump | Example            |
-| --------------------------------------------------- | ----------- | ------------------ |
-| `feat:` or `feat(scope):`                           | **minor**   | `1.1.0 → 1.2.0`    |
-| `fix:` or `fix(scope):`                             | **patch**   | `1.2.0 → 1.2.1`    |
-| any type + `!` suffix or `BREAKING CHANGE:` in body | **major**   | `1.2.1 → 2.0.0`    |
-| `chore:`, `docs:`, `ci:`, `style:`, `test:`         | **none**    | no release created |
 
 ---
 
@@ -277,31 +239,7 @@ every push to `main` was redundant.
 
 ---
 
-### 3.4 Repository merge strategy — squash only with PR title
-
-**Why:** Even with a validated PR title, the merge button previously allowed
-three strategies: squash, merge commit, and rebase. A merge commit or rebase
-would land commits on `main` whose messages were never validated, breaking the
-`semantic-release` chain.
-
-**Changes applied via `gh` CLI:**
-
-| Setting changed                  | Before               | After      |
-| -------------------------------- | -------------------- | ---------- |
-| `allow_merge_commit`             | `true`               | `false`    |
-| `allow_rebase_merge`             | `true`               | `false`    |
-| `squash_merge_commit_title`      | `COMMIT_OR_PR_TITLE` | `PR_TITLE` |
-| `use_squash_pr_title_as_default` | `false`              | `true`     |
-| `delete_branch_on_merge`         | `false`              | `true`     |
-
-The most important change is `squash_merge_commit_title: PR_TITLE`. Previously
-set to `COMMIT_OR_PR_TITLE`, GitHub showed a free-text box pre-filled with the
-first commit message, not the PR title — meaning a maintainer could type anything
-as the commit message, bypassing both the PR title check and semantic versioning.
-
----
-
-### 3.5 Orphaned tag cleanup
+### 3.4 Orphaned tag cleanup
 
 The first release run failed at the npm publish step (OIDC not yet configured),
 but `semantic-release` had already created the `v1.1.0` git tag before the
@@ -379,54 +317,7 @@ https://github.com/kamansoft/vite-plugin-flatwave-react
 
 ---
 
-### 4.2 Merge strategy — squash only (critical for version gating)
-
-**URL:** https://github.com/kamansoft/vite-plugin-flatwave-react/settings
-
-This is the setting that closes the loop between the validated PR title and the
-commit that `semantic-release` reads on `main`.
-
-**Configured via `gh` CLI:**
-
-```bash
-gh api repos/kamansoft/vite-plugin-flatwave-react \
-  --method PATCH \
-  --header "Accept: application/vnd.github+json" \
-  --input - <<'EOF'
-{
-  "allow_squash_merge": true,
-  "allow_merge_commit": false,
-  "allow_rebase_merge": false,
-  "squash_merge_commit_title": "PR_TITLE",
-  "squash_merge_commit_message": "PR_BODY",
-  "use_squash_pr_title_as_default": true,
-  "delete_branch_on_merge": true
-}
-EOF
-```
-
-| Setting                          | Value      | Why                                                                                                                                                  |
-| -------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `allow_squash_merge`             | `true`     | The only allowed merge strategy                                                                                                                      |
-| `allow_merge_commit`             | `false`    | Disabled — a merge commit message is not the PR title and would not be validated                                                                     |
-| `allow_rebase_merge`             | `false`    | Disabled — rebase creates individual commits from the branch; their messages are not validated by `pr-title.yml`                                     |
-| `squash_merge_commit_title`      | `PR_TITLE` | **Key setting.** Forces GitHub to use the PR title (not the first commit message) as the squash commit title. This is what `semantic-release` reads. |
-| `squash_merge_commit_message`    | `PR_BODY`  | PR description becomes the commit body (appears in changelogs)                                                                                       |
-| `use_squash_pr_title_as_default` | `true`     | Pre-fills the squash dialog with the PR title (UI consistency)                                                                                       |
-| `delete_branch_on_merge`         | `true`     | Feature branches are automatically deleted after merge (housekeeping)                                                                                |
-
-**To verify these settings in the browser:**
-Go to **https://github.com/kamansoft/vite-plugin-flatwave-react/settings** →
-scroll to **Pull Requests** section. You should see only **"Allow squash
-merging"** checked, and the squash commit title set to **"Pull request title"**.
-
-**Why this matters:** Without `squash_merge_commit_title: PR_TITLE`, GitHub lets
-the merger type any commit title in the squash dialog — bypassing PR title
-validation completely and breaking the semantic-release chain.
-
----
-
-### 4.3 GitHub Actions secrets
+### 4.2 GitHub Actions secrets
 
 Navigate to:
 **https://github.com/kamansoft/vite-plugin-flatwave-react/settings/secrets/actions**
@@ -648,25 +539,6 @@ npm publish --access public \
   --userconfig /tmp/.npmrc-publish
 # → + @kamansoft/vite-plugin-flatwave-react@0.1.0
 
-# ── Merge strategy — enforce squash-only with PR title as commit ──────────────
-gh api repos/kamansoft/vite-plugin-flatwave-react \
-  --method PATCH \
-  --header "Accept: application/vnd.github+json" \
-  --input - <<'EOF'
-{
-  "allow_squash_merge": true,
-  "allow_merge_commit": false,
-  "allow_rebase_merge": false,
-  "squash_merge_commit_title": "PR_TITLE",
-  "squash_merge_commit_message": "PR_BODY",
-  "use_squash_pr_title_as_default": true,
-  "delete_branch_on_merge": true
-}
-EOF
-# Disabled merge commits and rebase. Set squash commit title to always use the
-# PR title (not the first commit message), ensuring the validated PR title is
-# exactly what semantic-release reads on main.
-
 # ── Branch protection (run once after workflows existed) ──────────────────────
 gh api repos/kamansoft/vite-plugin-flatwave-react/branches/main/protection \
   --method PUT \
@@ -714,44 +586,6 @@ git checkout main && git pull origin main
 git cherry-pick feat/publish-to-npm   # the OIDC commit
 git push origin main
 # → remote: Bypassed rule violations for refs/heads/main
-
-# ── Lock main for everyone including admins (run after all PRs pass) ──────────
-# Final branch protection: enforce_admins: true prevents ALL direct pushes,
-# including org admins. This is the definitive locked state.
-gh api repos/kamansoft/vite-plugin-flatwave-react/branches/main/protection \
-  --method PUT \
-  --header "Accept: application/vnd.github+json" \
-  --input - <<'EOF'
-{
-  "required_status_checks": {
-    "strict": true,
-    "contexts": ["validate", "test-matrix (22)", "test-matrix (24)", "Validate PR Title"]
-  },
-  "enforce_admins": true,
-  "required_pull_request_reviews": {
-    "required_approving_review_count": 0,
-    "dismiss_stale_reviews": true
-  },
-  "restrictions": null,
-  "allow_force_pushes": false,
-  "allow_deletions": false
-}
-EOF
-# enforce_admins: true  → no one can push directly to main, not even org admins
-# allow_force_pushes: false → history cannot be rewritten under any circumstance
-
-# ── Retarget orphaned release tag after force-reset of main ───────────────────
-# When main was force-reset to undo direct-push commits and they were re-landed
-# via a proper PR, the vX.Y.Z tag created by the failed release run was left
-# pointing to a commit outside main's new ancestry. semantic-release then failed
-# with "exit code 128: git tag vX.Y.Z" (tag already exists).
-# Fix: delete the stale tag and recreate it on the current main HEAD so
-# semantic-release finds the tag in ancestry and reports "no relevant changes".
-git fetch --tags
-git push origin --delete v1.1.0     # remove stale tag from remote
-git tag -d v1.1.0                   # remove stale tag locally
-git tag v1.1.0 <main-HEAD-sha>      # recreate on current main HEAD
-git push origin v1.1.0              # push corrected tag
 
 # ── Verify final published version ───────────────────────────────────────────
 npm view @kamansoft/vite-plugin-flatwave-react versions --json
