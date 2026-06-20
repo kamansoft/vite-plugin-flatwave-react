@@ -1,6 +1,7 @@
 # vite-plugin-flatwave-react
 
 [![npm version](https://img.shields.io/npm/v/@kamansoft/vite-plugin-flatwave-react.svg)](https://www.npmjs.com/package/@kamansoft/vite-plugin-flatwave-react)
+[![npm downloads](https://img.shields.io/npm/dw/@kamansoft/vite-plugin-flatwave-react.svg)](https://www.npmjs.com/package/@kamansoft/vite-plugin-flatwave-react)
 [![CI](https://github.com/kamansoft/vite-plugin-flatwave-react/actions/workflows/ci.yml/badge.svg)](https://github.com/kamansoft/vite-plugin-flatwave-react/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
