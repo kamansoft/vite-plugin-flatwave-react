@@ -97,3 +97,5 @@ Use `--strict-missing` to fail when locale variants are missing.
 ## License
 
 MIT © 2026 Flatwave contributors.
+
+## Example App Integration

@@ -3,10 +3,9 @@ import { buildIndex } from './content/indexer.js';
 import { validateContent } from './content/validator.js';
 import { parseMarkdown } from './content/parser.js';
 import { routeForLocaleSlug } from './content/scanner.js';
-import { escapeHtml, escapeXml, renderHtmlHead } from './seo/metadata.js';
+import { runSsg } from './ssg/runSsg.js';
 const VIRTUAL_ID = '\0virtual:flatwave/content';
 const PUBLIC_VIRTUAL_ID = 'virtual:flatwave/content';
-// Test comment for lint-staged
 export function flatwaveContent(options) {
     const normalizedOptions = normalizeOptions(options);
     let index = { entries: [], byId: {}, byLocale: {}, routes: [] };
@@ -73,35 +72,14 @@ export function flatwaveContent(options) {
         {
             name: 'flatwave-react:ssg',
             async generateBundle(_, bundle) {
-                const routes = index.routes;
                 const html = findIndexHtml(bundle);
                 const assets = extractAssets(html);
-                if (normalizedOptions.emitRouteManifest !== false) {
+                const outputFiles = await runSsg(index, normalizedOptions, assets);
+                for (const file of outputFiles) {
                     this.emitFile({
                         type: 'asset',
-                        fileName: 'route-manifest.json',
-                        source: JSON.stringify(routes, null, 2),
-                    });
-                }
-                if (normalizedOptions.emitSitemap !== false) {
-                    this.emitFile({
-                        type: 'asset',
-                        fileName: 'sitemap.xml',
-                        source: renderSitemap(routes, normalizedOptions.sitemap?.hostname ?? 'http://localhost:4173'),
-                    });
-                }
-                if (normalizedOptions.emitRobotsTxt !== false) {
-                    this.emitFile({
-                        type: 'asset',
-                        fileName: 'robots.txt',
-                        source: renderRobotsTxt(normalizedOptions.sitemap?.hostname ?? 'http://localhost:4173'),
-                    });
-                }
-                for (const route of routes) {
-                    this.emitFile({
-                        type: 'asset',
-                        fileName: `${route.path.replace(/^\//, '').replace(/\/$/, '')}/index.html`,
-                        source: renderRouteHtml(route, assets),
+                        fileName: file.fileName,
+                        source: file.source,
                     });
                 }
             },
@@ -120,6 +98,13 @@ function normalizeOptions(options) {
         emitRouteManifest: options.emitRouteManifest ?? true,
         emitSitemap: options.emitSitemap ?? true,
         emitRobotsTxt: options.emitRobotsTxt ?? true,
+        ssg: {
+            enabled: options.ssg?.enabled ?? true,
+            strategy: options.ssg?.strategy,
+            hooks: options.ssg?.hooks,
+            template: options.ssg?.template,
+            compileMarkdown: options.ssg?.compileMarkdown,
+        },
     };
 }
 function createVirtualModule(index, defaultLocale) {
@@ -195,52 +180,5 @@ function extractAssets(html) {
         ...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+\.css)"[^>]*>/g),
     ].map((match) => match[1]);
     return { scripts, styles };
-}
-function renderSitemap(routes, hostname) {
-    const base = hostname.replace(/\/$/, '');
-    const urls = routes
-        .map((route) => {
-        const loc = `${base}${route.path}`;
-        return `<url><loc>${escapeXml(loc)}</loc><lastmod>${new Date().toISOString().slice(0, 10)}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`;
-    })
-        .join('');
-    return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>
-`;
-}
-function renderRobotsTxt(hostname) {
-    const base = hostname.replace(/\/$/, '');
-    return `User-agent: *
-Allow: /
-
-Sitemap: ${base}/sitemap.xml
-`;
-}
-function renderRouteHtml(route, assets) {
-    const scripts = assets.scripts
-        .map((src) => `<script type="module" crossorigin src="${escapeHtml(src)}"></script>`)
-        .join('\n');
-    const styles = assets.styles
-        .map((href) => `<link rel="stylesheet" href="${escapeHtml(href)}">`)
-        .join('\n');
-    const title = escapeHtml(route.metadata.title);
-    const description = route.metadata.description ? escapeHtml(route.metadata.description) : title;
-    return `<!doctype html>
-<html lang="${escapeHtml(route.locale)}">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title}</title>
-  <meta name="description" content="${description}">
-  <link rel="canonical" href="${escapeHtml(route.metadata.canonical ?? route.path)}">
-  ${styles}
-  ${renderHtmlHead(route)}
-</head>
-<body>
-  <div id="root"></div>
-  ${scripts}
-</body>
-</html>
-`;
 }
 export default flatwaveContent;

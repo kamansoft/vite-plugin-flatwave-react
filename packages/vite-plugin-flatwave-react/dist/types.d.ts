@@ -9,6 +9,33 @@ export interface FlatwaveRobotsOptions {
     sitemapPath?: string;
     rules?: string[];
 }
+export interface MarkdownCompilerOptions {
+    remarkPlugins?: unknown[];
+    rehypePlugins?: unknown[];
+    allowRawHtml?: boolean;
+}
+export interface RenderStrategy {
+    render(context: unknown): Promise<string>;
+}
+export interface RenderHooks {
+    beforeRender?: (context: unknown) => Promise<unknown> | unknown;
+    transformMarkdown?: (markdown: string, context: unknown) => Promise<string> | string;
+    transformHtml?: (html: string, context: unknown) => Promise<string> | string;
+    afterRender?: (html: string, context: unknown) => Promise<void> | void;
+    onError?: (error: Error, context: unknown) => Promise<string> | string;
+}
+export interface TemplateOverrides {
+    indexHtml?: string;
+    entryClient?: string;
+    entryServer?: string;
+}
+export interface SsgOptions {
+    enabled: boolean;
+    strategy?: RenderStrategy;
+    hooks?: Partial<RenderHooks>;
+    template?: string | TemplateOverrides;
+    compileMarkdown?: MarkdownCompilerOptions;
+}
 export interface FlatwaveContentOptions {
     contentDir: string;
     locales: string[];
@@ -23,6 +50,7 @@ export interface FlatwaveContentOptions {
     emitRobotsTxt?: boolean;
     sitemap?: FlatwaveSitemapOptions;
     robots?: FlatwaveRobotsOptions;
+    ssg?: SsgOptions;
 }
 export interface FlatwaveFrontmatter extends Record<string, unknown> {
     title: string;
@@ -85,3 +113,4 @@ export interface ValidationResult {
     errors: string[];
     warnings: string[];
 }
+export { compileMarkdownToHtml } from './content/markdownCompiler.js';

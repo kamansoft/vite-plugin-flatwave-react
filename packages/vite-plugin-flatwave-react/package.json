@@ -1,6 +1,6 @@
 {
   "name": "@kamansoft/vite-plugin-flatwave-react",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Vite content plugin for Markdown-driven, i18n-aware static React sites.",
   "type": "module",
   "main": "./dist/index.js",
@@ -27,6 +27,10 @@
     },
     "./virtual": {
       "types": "./dist/react/virtual.d.ts"
+    },
+    "./ssg": {
+      "types": "./dist/ssg/index.d.ts",
+      "import": "./dist/ssg/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -77,7 +81,13 @@
   "dependencies": {
     "commander": "^13.1.0",
     "fast-glob": "^3.3.3",
-    "gray-matter": "^4.0.3"
+    "gray-matter": "^4.0.3",
+    "remark": "^15.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.0",
+    "rehype-stringify": "^10.0.1",
+    "rehype-raw": "^7.0.0",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
