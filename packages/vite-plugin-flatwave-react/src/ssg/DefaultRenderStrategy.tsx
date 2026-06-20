@@ -3,7 +3,7 @@ import type { RenderStrategy, RenderContext } from './types.js';
 
 export class DefaultRenderStrategy implements RenderStrategy {
   async render(context: RenderContext): Promise<string> {
-    const { route, contentEntry, components, locale } = context;
+    const { route, contentEntry, components } = context;
 
     const componentModule = components.get(route.component || '');
 
@@ -34,7 +34,7 @@ export class DefaultRenderStrategy implements RenderStrategy {
     const props = {
       ...contentEntry.frontmatter,
       markdownHtml: contentEntry.body,
-      locale,
+      locale: route.locale,
       route: route.path,
     };
 

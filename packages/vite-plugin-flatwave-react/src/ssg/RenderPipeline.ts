@@ -1,5 +1,5 @@
 import type { RenderContext } from './types.js';
-import type { RenderHooks } from '../types.js';
+import type { RenderHooks, EmitFilesContext, SsgOutputFile } from '../types.js';
 
 type HookPhase = keyof RenderHooks;
 
@@ -8,6 +8,7 @@ type TransformMarkdownHook = NonNullable<RenderHooks['transformMarkdown']>;
 type TransformHtmlHook = NonNullable<RenderHooks['transformHtml']>;
 type AfterRenderHook = NonNullable<RenderHooks['afterRender']>;
 type OnErrorHook = NonNullable<RenderHooks['onError']>;
+type EmitFilesHook = NonNullable<RenderHooks['emitFiles']>;
 
 export class RenderPipeline {
   private beforeRenderHooks: BeforeRenderHook[] = [];
@@ -15,6 +16,7 @@ export class RenderPipeline {
   private transformHtmlHooks: TransformHtmlHook[] = [];
   private afterRenderHooks: AfterRenderHook[] = [];
   private onErrorHooks: OnErrorHook[] = [];
+  private emitFilesHooks: EmitFilesHook[] = [];
 
   constructor(initialHooks: Partial<RenderHooks> = {}) {
     if (initialHooks.beforeRender) this.beforeRenderHooks.push(initialHooks.beforeRender);
@@ -23,6 +25,7 @@ export class RenderPipeline {
     if (initialHooks.transformHtml) this.transformHtmlHooks.push(initialHooks.transformHtml);
     if (initialHooks.afterRender) this.afterRenderHooks.push(initialHooks.afterRender);
     if (initialHooks.onError) this.onErrorHooks.push(initialHooks.onError);
+    if (initialHooks.emitFiles) this.emitFilesHooks.push(initialHooks.emitFiles);
   }
 
   addHook(phase: HookPhase, hook: unknown): void {
@@ -89,6 +92,21 @@ export class RenderPipeline {
     return `<p data-ssg-error>Render error: ${error.message}</p>`;
   }
 
+  async executeEmitFiles(context: EmitFilesContext): Promise<SsgOutputFile[]> {
+    const results: SsgOutputFile[] = [];
+    for (const hook of this.emitFilesHooks) {
+      try {
+        const files = await hook(context);
+        if (Array.isArray(files)) {
+          results.push(...files);
+        }
+      } catch (error) {
+        console.error(`[RenderPipeline] emitFiles hook failed:`, error);
+      }
+    }
+    return results;
+  }
+
   hasHooks(phase: HookPhase): boolean {
     const hooks = this.getHooks(phase);
     return hooks !== undefined && hooks.length > 0;
@@ -106,6 +124,8 @@ export class RenderPipeline {
         return this.afterRenderHooks as unknown[];
       case 'onError':
         return this.onErrorHooks as unknown[];
+      case 'emitFiles':
+        return this.emitFilesHooks as unknown[];
     }
   }
 }

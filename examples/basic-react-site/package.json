@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.4",
+    "@kamansoft/vite-plugin-flatwave-react": "file:../../packages/vite-plugin-flatwave-react",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^9.0.3",
-    "@kamansoft/vite-plugin-flatwave-react": "file:../../packages/vite-plugin-flatwave-react"
+    "react-helmet-async": "^2.0.0",
+    "react-router-dom": "^6.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",

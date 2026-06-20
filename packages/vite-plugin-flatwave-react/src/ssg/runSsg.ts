@@ -13,11 +13,7 @@ import {
   compileMarkdownToHtml,
   type MarkdownCompilerOptions,
 } from '../content/markdownCompiler.js';
-
-export interface SsgOutputFile {
-  fileName: string;
-  source: string;
-}
+import type { SsgOutputFile } from '../types.js';
 
 export function renderSitemap(routes: FlatwaveRoute[], hostname: string): string {
   const base = hostname.replace(/\/$/, '');
@@ -204,6 +200,15 @@ export async function runSsg(
       source: renderRobotsTxt(options.sitemap?.hostname ?? 'http://localhost:4173'),
     });
   }
+
+  // Call emitFiles hook after all routes are rendered
+  const emitFilesContext = {
+    routes,
+    contentIndex: index,
+    renderedFiles: outputFiles,
+  };
+  const emittedFiles = await pipeline.executeEmitFiles(emitFilesContext);
+  outputFiles.push(...emittedFiles);
 
   return outputFiles;
 }

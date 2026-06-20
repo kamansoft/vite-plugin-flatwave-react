@@ -28,6 +28,18 @@ export interface RenderHooks {
   transformHtml?: (html: string, context: unknown) => Promise<string> | string;
   afterRender?: (html: string, context: unknown) => Promise<void> | void;
   onError?: (error: Error, context: unknown) => Promise<string> | string;
+  emitFiles?: (context: EmitFilesContext) => Promise<SsgOutputFile[]> | SsgOutputFile[];
+}
+
+export interface SsgOutputFile {
+  fileName: string;
+  source: string;
+}
+
+export interface EmitFilesContext {
+  routes: FlatwaveRoute[];
+  contentIndex: FlatwaveContentIndex;
+  renderedFiles: SsgOutputFile[];
 }
 
 export interface TemplateOverrides {
