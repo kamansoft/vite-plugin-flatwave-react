@@ -1,4 +1,5 @@
 import { readdir } from 'node:fs/promises';
+export type { ValidationResult } from '../types.js';
 import path from 'node:path';
 import type { FlatwaveContentEntry, FlatwaveContentOptions, ValidationResult } from '../types';
 import { routeForLocaleSlug, scanMarkdownFiles } from './scanner.js';

@@ -15,6 +15,20 @@ export default defineConfig({
       sitemap: {
         hostname: 'http://localhost:4173',
       },
+      ssg: {
+        enabled: true,
+        hooks: {
+          // 12.2 — transformMarkdown: append a built-with note to every page body
+          transformMarkdown: async (markdown, _context) => {
+            return markdown + '\n\n---\n\n*This page was built with **Flatwave SSG 1.0.0**.*';
+          },
+          // 12.3 — transformHtml: inject a lightweight analytics beacon before </body>
+          transformHtml: async (html, context) => {
+            const beacon = `<script>/* flatwave-analytics */console.info('[flatwave] page rendered:', '${context.route.path}', 'locale:', '${context.route.locale}');</script>`;
+            return html.replace('</body>', beacon + '\n</body>');
+          },
+        },
+      },
     }),
   ],
   build: {

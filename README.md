@@ -270,7 +270,7 @@ Trusted publishing requires the package to already exist on npm, so a maintainer
 
 1. Publish the initial version once to create the package on npm.
 2. Add the **Trusted Publisher** on npmjs.com → package **Settings → Trusted Publisher → GitHub Actions**: user/org `kamansoft`, repo `vite-plugin-flatwave-react`, workflow `release.yml`.
-3. Push the baseline tag `v0.1.0` so semantic-release continues the 0.x line (otherwise the first automated release defaults to `1.0.0`).
+3. Push the baseline tag `v1.0.0` so semantic-release continues the 0.x line (otherwise the first automated release defaults to `1.0.0`).
 
 After that, every merge to `main` releases automatically — no tokens, no manual version edits.
 
@@ -294,6 +294,73 @@ dev-notes/publish-to-npm/scripts/dry-run-release.sh
 
 ---
 
-## License
+## Appendix B – SSG Extensibility (`./ssg`)
 
-MIT © 2026 – Flatwave contributors.
+This section covers the new `./ssg` public API added in this release.
+
+### 13.1 SSG options and capabilities
+
+`SsgOptions` let you replace the built‑in renderer, inject hook phases, and override templates.
+
+```ts
+import { flatwaveContent } from 'vite-plugin-flatwave-react';
+import { DefaultRenderStrategy, RenderPipeline } from './ssg'; // adjust path
+
+flatwaveContent({
+  contentDir: './src/content',
+  locales: ['es', 'pt'],
+  defaultLocale: 'es',
+  ssg: {
+    enabled: true,
+    compileMarkdown: { allowRawHtml: true },
+    strategy: new MyCustomStrategy(),
+    hooks: {
+      beforeRender: [
+        (ctx) => {
+          /* … */ return ctx;
+        },
+      ],
+      transformMarkdown: [(md, ctx) => md.replace(/foo/g, 'bar')],
+    },
+    template: {
+      indexHtml: fs.readFileSync('./custom/layout.html', 'utf-8'),
+    },
+  },
+});
+```
+
+### 13.2 `RenderStrategy` interface
+
+```ts
+import type { RenderContext } from './ssg';
+
+export interface RenderStrategy {
+  render(context: RenderContext): Promise<string>;
+}
+```
+
+`DefaultRenderStrategy` renders a React component with `renderToString`; you can implement async rendering, micro-frontend composition, or server-side data fetching by swapping this implementation.
+
+### 13.3 Hook phases
+
+| Phase               | Signature             | Use case                                |
+| ------------------- | --------------------- | --------------------------------------- |
+| `beforeRender`      | `(ctx) => ctx`        | inject CSP headers, auth tokens, locale |
+| `transformMarkdown` | `(md, ctx) => md`     | preprocess markdown before compilation  |
+| `transformHtml`     | `(html, ctx) => html` | inject analytics, minify, rewrite links |
+| `afterRender`       | `(html, ctx) => void` | side effects (logging, audit events)    |
+| `onError`           | `(err, ctx) => html`  | recover with safe fallback HTML         |
+
+### 13.4 Template overrides
+
+```ts
+ssg: {
+  template: {
+    indexHtml: fs.readFileSync('./my-layout.html', 'utf-8'),
+  },
+}
+```
+
+Setting **only** the files you need keeps the default built‑in templates for the rest.
+
+---
