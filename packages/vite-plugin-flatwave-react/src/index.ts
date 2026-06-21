@@ -4,7 +4,6 @@ import { buildIndex } from './content/indexer.js';
 import { validateContent } from './content/validator.js';
 import { parseMarkdown } from './content/parser.js';
 import { routeForLocaleSlug } from './content/scanner.js';
-import { runSsg } from './ssg/runSsg.js';
 import type { FlatwaveContentIndex, FlatwaveContentOptions } from './types';
 
 const VIRTUAL_ID = '\0virtual:flatwave/content';
@@ -81,6 +80,7 @@ export function flatwaveContent(options: FlatwaveContentOptions): Plugin[] {
         const html = findIndexHtml(bundle);
         const assets = extractAssets(html);
 
+        const { runSsg } = await import('./ssg/runSsg.js');
         const outputFiles = await runSsg(index, normalizedOptions, assets);
 
         for (const file of outputFiles) {
@@ -102,9 +102,8 @@ function normalizeOptions(options: FlatwaveContentOptions): FlatwaveContentOptio
 
   return {
     ...options,
-    requiredFields: options.requiredFields ?? ['title', 'slug', 'id', 'component', 'public'],
+    requiredFields: options.requiredFields ?? ['title', 'slug', 'id', 'public'],
     validateComponents: options.validateComponents ?? true,
-    componentsDir: options.componentsDir,
     emitRouteManifest: options.emitRouteManifest ?? true,
     emitSitemap: options.emitSitemap ?? true,
     emitRobotsTxt: options.emitRobotsTxt ?? true,

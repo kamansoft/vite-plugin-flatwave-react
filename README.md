@@ -10,7 +10,7 @@ A Vite plugin that turns a directory of Markdown files into a **fully typed, i18
 At build time the plugin:
 
 - Scans `src/content/{locale}/*.md` and parses front-matter with [`gray-matter`](https://github.com/jonschlinkert/gray-matter)
-- Validates required fields, duplicate IDs, slugs, component references, and missing locale variants
+- Validates required fields, duplicate IDs, slugs, and missing locale variants
 - Exposes a **virtual module** (`virtual:flatwave/content`) with typed helper functions usable in any React component
 - Generates locale-prefixed static HTML pages via `react-dom/server`
 - Emits `sitemap.xml`, `robots.txt`, and `route-manifest.json`
@@ -80,7 +80,6 @@ export default defineConfig({
       locales: ['es', 'pt'], // all supported locales
       defaultLocale: 'es', // must be in locales[]
       strictMissingLocales: false, // true → missing locale = build error
-      componentsDir: path.resolve(__dirname, 'src/components'), // for component validation
       sitemap: {
         hostname: 'https://example.com', // used in sitemap.xml and robots.txt
       },
@@ -104,11 +103,6 @@ src/
       index.md
       about.md
       program.md
-  components/
-    SimplePage.tsx      ← referenced by component: 'SimplePage' in frontmatter
-    ProgramPage.tsx
-    LanguageSwitcher.tsx
-    MarkdownRenderer.tsx
 ```
 
 Each locale must mirror the same set of content IDs. Missing locale variants produce warnings (or errors with `strictMissingLocales: true`).
@@ -122,7 +116,6 @@ Every `.md` file must include these **required fields**:
 title: 'About Us'
 slug: 'about' # URL segment — becomes /{locale}/about
 id: 'about' # groups translations: same id across locales
-component: 'SimplePage' # React component name in componentsDir
 public: true # false → excluded from routes, sitemap, manifest
 description: 'Short description'
 canonical: '/es/about' # optional, defaults to /{locale}/{slug}
@@ -142,12 +135,12 @@ jsonLd:
 # Navigation hints
 menu: 'main'
 menu_position: 2
-# Any extra keys are preserved in attributes and forwarded to the component
+# Any extra keys are preserved in attributes
 ---
 Markdown body here. GitHub-flavoured Markdown. No MDX in v1.
 ```
 
-**All extra frontmatter keys** not in the baseline list are preserved in `attributes` and forwarded as props to the React component — no schema changes required.
+**All extra frontmatter keys** not in the baseline list are preserved in `attributes` and accessible via React hooks and the virtual module.
 
 ---
 
@@ -394,15 +387,13 @@ The plugin validates content at build time (also exposed as a standalone CLI). V
 | Duplicate content IDs per locale          | **Error** — build fails                                  |
 | Duplicate slugs per locale                | **Error** — build fails                                  |
 | Duplicate menu positions                  | **Error** — build fails                                  |
-| Component not found in `componentsDir`    | **Error** — build fails                                  |
 | Content ID missing in one or more locales | **Warning** (or error with `strictMissingLocales: true`) |
 | No public routes generated                | **Warning**                                              |
 
 ```ts
 flatwaveContent({
   // ...
-  requiredFields: ['title', 'slug', 'id', 'component', 'public'], // default
-  validateComponents: true, // default: true
+  requiredFields: ['title', 'slug', 'id', 'public'], // default
   strictMissingLocales: false, // default: false
 });
 ```
@@ -418,21 +409,18 @@ npx flatwave-validate \
   --content-dir src/content \
   --locales es,pt \
   --default-locale es \
-  --components-dir src/components \
   --strict-missing   # optional: missing locale → error instead of warning
 
 # Exit code 0 → passed
 # Exit code 1 → errors found
 ```
 
-| Option                      | Description                                                                 |
-| --------------------------- | --------------------------------------------------------------------------- |
-| `--content-dir <dir>`       | Path to the content directory                                               |
-| `--locales <list>`          | Comma-separated locale identifiers                                          |
-| `--default-locale <locale>` | The primary locale                                                          |
-| `--components-dir <dirs>`   | Comma-separated component directories (default: `src/components,src/pages`) |
-| `--strict-missing`          | Treat missing locale variants as errors                                     |
-| `--no-validate-components`  | Skip component existence check                                              |
+| Option                | Description                             |
+| --------------------- | --------------------------------------- |
+| `--content-dir <dir>` | Path to the content directory           |
+| `--locales <list>`    | Comma-separated locale identifiers      |
+| `--default-locale`    | The primary locale                      |
+| `--strict-missing`    | Treat missing locale variants as errors |
 
 ---
 

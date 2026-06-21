@@ -38,27 +38,6 @@ Sitemap: ${base}/sitemap.xml
 `;
 }
 
-async function buildComponentsMap(routes: FlatwaveRoute[]): Promise<Map<string, unknown>> {
-  const components = new Map<string, unknown>();
-  const uniqueComponents = new Set(routes.map((r) => r.component).filter(Boolean));
-
-  for (const componentName of uniqueComponents) {
-    try {
-      const module = await import(`../react/${componentName}.js`);
-      components.set(componentName!, module);
-    } catch {
-      try {
-        const module = await import(`virtual:flatwave/components/${componentName}`);
-        components.set(componentName!, module);
-      } catch {
-        console.warn(`[SSG] Could not load component: ${componentName}`);
-      }
-    }
-  }
-
-  return components;
-}
-
 function toCompilerOptions(
   opts?: SsgOptions['compileMarkdown']
 ): MarkdownCompilerOptions | undefined {
@@ -83,7 +62,7 @@ export async function runSsg(
   const strategy = ssgOptions.strategy ?? new DefaultRenderStrategy();
   const pipeline = new RenderPipeline(ssgOptions.hooks);
 
-  const components = await buildComponentsMap(routes);
+  const components = new Map<string, unknown>();
 
   const concurrencyLimit = 4;
   const routeChunks: FlatwaveRoute[][] = [];

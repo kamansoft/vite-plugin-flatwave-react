@@ -11,7 +11,6 @@ export default defineConfig({
       locales: ['es', 'pt'],
       defaultLocale: 'es',
       strictMissingLocales: false,
-      componentsDir: path.resolve(__dirname, 'src/components'),
       sitemap: {
         hostname: 'http://localhost:4173',
       },

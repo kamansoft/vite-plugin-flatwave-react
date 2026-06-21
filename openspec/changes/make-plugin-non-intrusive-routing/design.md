@@ -89,8 +89,8 @@ change — they check title, locale, sitemap, and robots, all of which remain va
 
 ## Risks / Trade-offs
 
-| Risk                                                                                    | Mitigation                                                                              |
-| --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `react-helmet-async` fix may not cover all edge cases                                   | Test with `renderToString` in unit tests for `DefaultRenderStrategy`                    |
-| Removing `component` from frontmatter breaks validation for projects relying on it      | Documented as a breaking change                                                         |
-| Example site e2e assertions depend on rendered page title                               | `FlatwaveMDPageComponent` renders `<title>` from frontmatter — assertions remain valid  |
+| Risk                                                                               | Mitigation                                                                             |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `react-helmet-async` fix may not cover all edge cases                              | Test with `renderToString` in unit tests for `DefaultRenderStrategy`                   |
+| Removing `component` from frontmatter breaks validation for projects relying on it | Documented as a breaking change                                                        |
+| Example site e2e assertions depend on rendered page title                          | `FlatwaveMDPageComponent` renders `<title>` from frontmatter — assertions remain valid |

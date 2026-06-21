@@ -1,4 +1,4 @@
-import type { FlatwaveFrontmatter, FlatwaveRoute } from '../types.js';
+import type { FlatwaveFrontmatter, SeoMetadata } from '../types.js';
 
 export interface FlatwaveMDComponentProps<TFrontmatter = FlatwaveFrontmatter> {
   frontmatter: TFrontmatter;
@@ -27,11 +27,21 @@ export interface FlatwaveLanguageContextValue {
   defaultLanguage: string;
 }
 
+export interface FlatwaveVirtualRoute {
+  locale: string;
+  path: string;
+  contentId: string;
+  metadata: SeoMetadata;
+  frontmatter: Record<string, unknown>;
+  alternatives: Record<string, string>;
+}
+
 export interface FlatwaveLanguageRouterProps {
   supportedLanguages: string[];
   defaultLanguage: string;
   onLanguageChange?: (lang: string) => void;
-  renderPage: (route: FlatwaveRoute, lang: string) => React.ReactNode;
+  routes: FlatwaveVirtualRoute[];
+  renderPage: (route: FlatwaveVirtualRoute, lang: string) => React.ReactNode;
   dynamicRoute?: {
     path: string;
     renderPage: (params: { slug: string; lang: string }) => React.ReactNode;
@@ -47,8 +57,8 @@ export interface FlatwaveLanguageDetectorProps {
 }
 
 export interface FlatwaveAppRoutesProps {
-  routes?: FlatwaveRoute[];
-  renderPage: (route: FlatwaveRoute, lang: string) => React.ReactNode;
+  routes: FlatwaveVirtualRoute[];
+  renderPage: (route: FlatwaveVirtualRoute, lang: string) => React.ReactNode;
   layoutWrapper?: React.ComponentType<{ children: React.ReactNode; locale: string }>;
 }
 

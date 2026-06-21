@@ -7,18 +7,15 @@ const Routes = ReactRouter.Routes;
 const Route = ReactRouter.Route;
 
 export function FlatwaveAppRoutes({
-  routes: providedRoutes,
+  routes,
   renderPage,
   layoutWrapper,
 }: FlatwaveAppRoutesProps): React.ReactElement {
   const context = React.useContext(FlatwaveLanguageContext);
   const locale = context?.locale || '';
 
-  // Use providedRoutes or empty array (caller should provide routes)
-  const allRoutes = providedRoutes ?? [];
-
   // Group routes by locale
-  const localeRoutes = allRoutes.filter((r) => r.locale === locale);
+  const localeRoutes = routes.filter((r) => r.locale === locale);
 
   return (
     <Routes>

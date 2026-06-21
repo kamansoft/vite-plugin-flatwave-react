@@ -10,6 +10,7 @@ export function FlatwaveLanguageRouter({
   supportedLanguages,
   defaultLanguage,
   onLanguageChange,
+  routes,
   renderPage,
   layoutWrapper,
 }: FlatwaveLanguageRouterProps): React.ReactElement {
@@ -20,7 +21,7 @@ export function FlatwaveLanguageRouter({
         defaultLanguage={defaultLanguage}
         onLanguageChange={onLanguageChange}
       >
-        <FlatwaveAppRoutes renderPage={renderPage} layoutWrapper={layoutWrapper} />
+        <FlatwaveAppRoutes routes={routes} renderPage={renderPage} layoutWrapper={layoutWrapper} />
       </FlatwaveLanguageDetector>
     </BrowserRouter>
   );

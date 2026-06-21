@@ -10,11 +10,6 @@ program
   .requiredOption('--content-dir <dir>', 'Markdown content directory, e.g. src/content')
   .requiredOption('--locales <locales>', 'Comma-separated locales, e.g. es,pt')
   .requiredOption('--default-locale <locale>', 'Default locale, e.g. es')
-  .option(
-    '--components-dir <dirs>',
-    'Comma-separated component directories',
-    'src/components,src/pages'
-  )
   .option('--strict-missing', 'Fail when locale variants are missing', false)
   .option('--no-validate-components', 'Disable component existence validation')
   .action(
@@ -22,7 +17,6 @@ program
       contentDir: string;
       locales: string;
       defaultLocale: string;
-      componentsDir: string;
       strictMissing: boolean;
       validateComponents: boolean;
     }) => {
@@ -30,16 +24,11 @@ program
         .split(',')
         .map((locale) => locale.trim())
         .filter(Boolean);
-      const componentsDir = options.componentsDir
-        .split(',')
-        .map((dir) => dir.trim())
-        .filter(Boolean);
 
       const result = await validateContent({
         contentDir: options.contentDir,
         locales,
         defaultLocale: options.defaultLocale,
-        componentsDir,
         strictMissingLocales: options.strictMissing,
         validateComponents: options.validateComponents,
       });

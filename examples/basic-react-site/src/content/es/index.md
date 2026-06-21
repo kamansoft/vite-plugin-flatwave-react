@@ -2,7 +2,6 @@
 title: 'Inicio'
 slug: 'index'
 id: 'home'
-component: 'SimplePage'
 public: true
 description: 'Página de inicio del ejemplo Flatwave.'
 canonical: '/es/'

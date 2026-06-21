@@ -70,7 +70,7 @@ vite-plugin-flatwave-react/          ← npm workspace root
 │       │   │   ├── parser.ts        ← standalone markdown parse (gray-matter wrapper)
 │       │   │   ├── indexer.ts       ← builds FlatwaveContentIndex from scanned files
 │       │   │   ├── routeBuilder.ts  ← assembles FlatwaveRoute[] with SEO metadata
-│       │   │   ├── validator.ts     ← content rules: required fields, duplicates, components
+│       │   │   ├── validator.ts     ← content rules: required fields, duplicates
 │       │   │   └── markdownCompiler.ts ← unified/remark/rehype markdown → HTML
 │       │   ├── ssg/
 │       │   │   ├── runSsg.ts        ← orchestrates SSG: renders all routes in batches
@@ -192,7 +192,7 @@ graph TB
 
 The entry point exports the `flatwaveContent(options)` factory which:
 
-1. **Normalizes options** — fills in defaults for optional fields (`requiredFields`, `validateComponents`, `emitRouteManifest`, `emitSitemap`, `emitRobotsTxt`, `ssg`).
+1. **Normalizes options** — fills in defaults for optional fields (`requiredFields`, `emitRouteManifest`, `emitSitemap`, `emitRobotsTxt`, `ssg`).
 2. **Returns three plugin objects** that Vite integrates into its build pipeline.
 
 ```
@@ -213,6 +213,8 @@ flatwaveContent(options)
     └─► Plugin 3: flatwave-react:ssg
             generateBundle() → runSsg(index, options, assets) → emitFile()
 ```
+
+**Note**: `componentsDir` and component validation have been removed. Route rendering now uses `FlatwaveMDPageComponent` as the single default renderer.
 
 ---
 
@@ -270,6 +272,7 @@ src/react/
 - **SSG Mode**: When `markdownHtml` prop is provided, renders pre-compiled HTML
 - **Client-side Mode**: When `markdown` prop is provided, uses `react-markdown`
 - **Composition**: All components accept render props or wrapper components for customization
+- **Default Renderer**: SSG uses `FlatwaveMDPageComponent` as the only renderer. No `componentsDir` or component field is required.
 
 ---
 
