@@ -1,35 +1,33 @@
 ## 1. Fix FlatwaveMDPageComponent for server-side rendering
 
 - [ ] 1.1 Update `FlatwaveMDPageComponent.tsx`: change `import { Helmet } from 'react-helmet-async'` to
-      `import * as ReactHelmet from 'react-helmet-async'; const Helmet = ReactHelmet.Helmet;`
+      `import * as ReactHelmet from 'react-helmet-async'; const { Helmet, HelmetProvider } = ReactHelmet;`
 - [ ] 1.2 Confirm `react-markdown` import in `FlatwaveMDComponent.tsx` already uses namespace import
       `import * as ReactMarkdown from 'react-markdown'`; fix if not
 - [ ] 1.3 Rebuild plugin: `npm run build:plugin`
 - [ ] 1.4 Write a unit test (`DefaultRenderStrategy.test.ts`) that calls `renderToString` with
       `FlatwaveMDPageComponent` and asserts the output contains `<main>`, the markdown body, and `<title>`
 
-## 2. Update DefaultRenderStrategy to use FlatwaveMDPageComponent as primary renderer
+## 2. Update DefaultRenderStrategy to use FlatwaveMDPageComponent as only renderer
 
-- [ ] 2.1 Rewrite `DefaultRenderStrategy.tsx`: primary render path calls
+- [ ] 2.1 Rewrite `DefaultRenderStrategy.tsx`: render path calls
       `renderToString(<HelmetProvider><FlatwaveMDPageComponent frontmatter={...} markdownHtml={...} locale={...} /></HelmetProvider>)`
-      using `import * as ReactHelmet from 'react-helmet-async'; const HelmetProvider = ReactHelmet.HelmetProvider;`
-- [ ] 2.2 Keep the consumer-component override path: when `componentModule` is found via `componentsDir`,
-      use that component; otherwise use `FlatwaveMDPageComponent`
-- [ ] 2.3 Remove the raw-markdown fallback (`return compiledBody`) — it MUST NOT appear anywhere in the
-      success path
+      using `import * as ReactHelmet from 'react-helmet-async'; const { HelmetProvider } = ReactHelmet;`
+- [ ] 2.2 Remove the consumer-component override path entirely — no `componentsDir`, no `buildComponentsMap`
+- [ ] 2.3 Remove the raw-markdown fallback (`return compiledBody`) — it MUST NOT appear anywhere
 - [ ] 2.4 Ensure error catch blocks still return `<p data-ssg-error>...</p>` for unexpected exceptions
 
-## 3. Remove component from default requiredFields
+## 3. Remove component from requiredFields entirely
 
 - [ ] 3.1 In `normalizeOptions()` (`src/index.ts`), change default `requiredFields` from
       `['title', 'slug', 'id', 'component', 'public']` to `['title', 'slug', 'id', 'public']`
-- [ ] 3.2 Update content validation docs and README to reflect new default
+- [ ] 3.2 Remove `component` from validation entirely — it is not a valid frontmatter field
 
-## 4. Make componentsDir optional in runSsg
+## 4. Remove componentsDir and buildComponentsMap from runSsg
 
-- [ ] 4.1 In `runSsg.ts`, wrap `buildComponentsMap(routes)` call in a guard:
-      `if (options.componentsDir) { components = await buildComponentsMap(routes); }`
-- [ ] 4.2 Pass empty `Map()` to `RenderContext.components` when `componentsDir` is not configured
+- [ ] 4.1 In `runSsg.ts`, remove `buildComponentsMap` function entirely
+- [ ] 4.2 Remove `componentsDir` from `SsgOptions` type and plugin options
+- [ ] 4.3 Pass empty `Map()` to `RenderContext.components` always
 
 ## 5. Make routes explicit in FlatwaveLanguageRouter and FlatwaveAppRoutes
 
@@ -47,8 +45,7 @@
       frontmatter files
 - [ ] 6.3 Rewrite `examples/basic-react-site/src/App.tsx` to use `FlatwaveLanguageRouter` +
       `FlatwaveMDPageComponent` (with `useFlatwaveRoutes` providing explicit routes)
-- [ ] 6.4 Remove or simplify `SimplePage.tsx` and `ProgramPage.tsx` — they are no longer required
-      by the SSG pipeline; keep them only if the example still wants to show custom component overrides
+- [ ] 6.4 Remove `SimplePage.tsx` and `ProgramPage.tsx` — they are no longer used
 - [ ] 6.5 Run `npm run build:example` and verify all HTML files are generated correctly with no
       `data-ssg-error` elements
 
@@ -60,8 +57,9 @@
 
 ## 8. Update README
 
-- [ ] 8.1 Update "How It Works" section: route generation is driven by content + composable components
-- [ ] 8.2 Remove `componentsDir` from the primary `vite.config.ts` example
-- [ ] 8.3 Remove `component: 'SimplePage'` from the primary frontmatter example
-- [ ] 8.4 Add "Automatic Route Generation" section showing `FlatwaveLanguageRouter` → SSG HTML flow
-- [ ] 8.5 Update "Build Outputs" section to clarify these come from the composable components
+| [ ] 8.1 Update "How It Works" section: route generation is driven by content + composable components
+| [ ] 8.2 Remove `componentsDir` from the primary `vite.config.ts` example
+| [ ] 8.3 Remove `component: 'SimplePage'` from the primary frontmatter example
+| [ ] 8.4 Add "Automatic Route Generation" section showing `FlatwaveLanguageRouter` → SSG HTML flow
+| [ ] 8.5 Update "Build Outputs" section to clarify these come from the composable components
+|

@@ -14,10 +14,8 @@ The same plugin already exports `FlatwaveMDPageComponent` — a fully capable, S
 component designed exactly for rendering a Markdown content entry as a complete HTML page. There is no
 reason for the SSG to bypass it in favour of loading arbitrary consumer components by name.
 
-The fix: `DefaultRenderStrategy` uses `FlatwaveMDPageComponent` as its primary (and default) renderer.
-Consumer page components registered via `componentsDir` remain supported as overrides for advanced cases,
-but they are no longer the required path. `componentsDir` and the frontmatter `component` field are
-deprecated in the default workflow.
+The fix: `DefaultRenderStrategy` uses `FlatwaveMDPageComponent` as its **only** renderer.
+`componentsDir` and the frontmatter `component` field are **removed entirely**.
 
 On the application side, `FlatwaveLanguageRouter` defines the client-side routing. Because the SSG and the
 client-side SPA now use the same `FlatwaveMDPageComponent` to render content, hydration is coherent: the
@@ -25,12 +23,12 @@ HTML the SSG produces matches the DOM the SPA would render for the same route.
 
 ## What Changes
 
-- **MODIFIED**: `DefaultRenderStrategy` uses `FlatwaveMDPageComponent` as the primary renderer.
+- **MODIFIED**: `DefaultRenderStrategy` uses `FlatwaveMDPageComponent` as its **only** renderer.
   It no longer requires a `componentsDir` or a `component` frontmatter field to produce valid HTML output.
-- **DEPRECATED**: `componentsDir` config option (still honoured for backward compatibility; consumer
-  components loaded by name remain an advanced override path).
-- **DEPRECATED**: `component` frontmatter field as a _required_ field (no longer in `requiredFields`
-  by default; still read when present for the advanced override path).
+- **REMOVED**: `componentsDir` config option — no longer accepted in plugin options.
+- **REMOVED**: `component` frontmatter field — no longer read or validated.
+- **ADDED**: Strategy pattern for build process extensibility - `onContentProcessed` hook in SSG options
+  allows users to define custom logic to create additional files (e.g., JSON) from the markdown content loop.
 - **KEPT**: `FlatwaveLanguageRouter`, `FlatwaveAppRoutes`, `FlatwaveLanguageSelector`,
   `FlatwaveMDComponent`, `FlatwaveMDPageComponent`, `FlatwaveLanguageDetector`, `FlatwaveLanguageContext` —
   all composable components unchanged in API.
@@ -41,6 +39,7 @@ HTML the SSG produces matches the DOM the SPA would render for the same route.
 - **MODIFIED**: README rewritten to show composable pattern as the primary usage: consumer builds their
   app with `FlatwaveLanguageRouter` + `FlatwaveMDPageComponent`; Vite generates static routes from those
   components automatically.
+- **ADDED**: Documentation of strategy pattern in README showing how to extend build process without modifying core.
 
 ## Capabilities
 
@@ -51,22 +50,20 @@ HTML the SSG produces matches the DOM the SPA would render for the same route.
 
 ### Modified Capabilities
 
-- `flatwave-md-page-component`: `DefaultRenderStrategy` SHALL use `FlatwaveMDPageComponent` as the primary
-  renderer (not a fallback). The component must be server-render-compatible (fix ESM/CJS interop for
+- `flatwave-md-page-component`: `DefaultRenderStrategy` SHALL use `FlatwaveMDPageComponent` as the **only**
+  renderer. The component must be server-render-compatible (fix ESM/CJS interop for
   `react-helmet-async` and `react-markdown` in Node SSG context).
-- `flatwave-language-router`: The `routes` prop is now explicit. The component SHALL NOT silently fall back
+- `flatwave-language-router`: The `routes` prop is now explicit (required). The component SHALL NOT silently fall back
   to calling `getRoutes(lang)` from the virtual module. Consumer supplies routes — typically via the
   `useFlatwaveRoutes(locale)` hook.
 - `flatwave-app-routes`: Same routes-explicit requirement as `flatwave-language-router`.
 
 ## Impact
 
-- `src/ssg/DefaultRenderStrategy.tsx`: Primary render path changed to `FlatwaveMDPageComponent`.
-- `src/ssg/runSsg.ts`: `buildComponentsMap` step becomes optional; called only when `componentsDir` is
-  configured.
+- `src/ssg/DefaultRenderStrategy.tsx`: Render path changed to use `FlatwaveMDPageComponent` as only renderer.
+- `src/ssg/runSsg.ts`: `buildComponentsMap` function and call **removed entirely**. `componentsDir` removed from options.
 - `src/react/FlatwaveMDPageComponent.tsx`: Must be fixed for server-side `renderToString` compatibility
-  (react-helmet-async `HelmetProvider` wrapping; react-markdown dynamic import or pure-HTML fallback when
-  `markdownHtml` is already provided).
+  (react-helmet-async `HelmetProvider` wrapping; react-markdown namespace import for CJS/ESM interop).
 - `examples/basic-react-site/`: `App.tsx` rewritten to use `FlatwaveLanguageRouter`; `componentsDir`
-  removed from `vite.config.ts`; frontmatter `component` field optional.
+  removed from `vite.config.ts`; frontmatter `component` field **removed**.
 - `packages/vite-plugin-flatwave-react/README.md`: Primary usage example updated.

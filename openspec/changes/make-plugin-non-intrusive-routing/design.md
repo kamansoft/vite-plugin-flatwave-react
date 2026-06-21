@@ -31,22 +31,22 @@ interoperability issue with `react-helmet-async` and `react-markdown` in the Nod
 
 **Goals:**
 
-- `DefaultRenderStrategy` uses `FlatwaveMDPageComponent` as its primary (and default) renderer.
+- `DefaultRenderStrategy` uses `FlatwaveMDPageComponent` as its **only** renderer.
 - `FlatwaveMDPageComponent` is fixed to work correctly in a Node `renderToString` context by resolving
   the `react-helmet-async` and `react-markdown` CJS/ESM interop issues.
-- `componentsDir` becomes an _optional override_ mechanism, not a required configuration.
-- The `component` frontmatter field is no longer in `requiredFields` by default; it is read as an override
-  when present.
+- `componentsDir` is **removed entirely** from plugin config.
+- The `component` frontmatter field is **removed entirely** — not in `requiredFields`, not read.
 - The example site demonstrates the composable pattern: `FlatwaveLanguageRouter` + `FlatwaveMDPageComponent`
   in `App.tsx`; `vite build` automatically generates all locale-prefixed HTML routes from that.
 - All existing e2e tests continue to pass.
+- The plugin provides a strategy pattern for build processes, allowing users to define custom logic to create additional files (e.g., JSON) from the recursive markdown content loop during rendering.
 
 **Non-Goals:**
 
 - Removing the SSG pipeline or making it opt-in.
-- Removing `componentsDir` support (keep for backward compatibility).
 - Changing the virtual module API.
 - Changing any composable component prop APIs.
+- Over-abstraction or over-engineering; the implementation follows DRY and SOLID principles.
 
 ## Decisions
 
@@ -70,31 +70,27 @@ component files. Apply the same fix consistently.
 tags into a side-channel object that can be extracted. In non-SSG (client-side) usage, the consumer wraps
 their app in `<HelmetProvider>` via their own entry point.
 
-### Decision 3: `buildComponentsMap` is called only when `componentsDir` is configured
+### Decision 3: `buildComponentsMap` is **removed** from `runSsg.ts`
 
-`runSsg.ts` currently calls `buildComponentsMap(routes)` unconditionally. After this change, it SHALL only
-call this function when `options.componentsDir` is non-null. This avoids a warning-filled build log for
-the common case where no `componentsDir` is set.
+The `buildComponentsMap` function and its call are deleted entirely. `RenderContext.components` is always
+an empty `Map()`. The SSG no longer loads consumer components by name.
 
-### Decision 4: `component` removed from default `requiredFields`
+### Decision 4: `component` removed from `requiredFields` entirely
 
-`requiredFields` defaults to `['title', 'slug', 'id', 'component', 'public']`. The `component` field is
-no longer required for SSG to work because `FlatwaveMDPageComponent` handles any content entry without
-it. Remove `component` from the default list. Consumers who still use the component-by-name override can
-add it back explicitly.
+`requiredFields` defaults to `['title', 'slug', 'id', 'public']`. The `component` field is no longer
+valid in frontmatter — it is ignored if present.
 
 ### Decision 5: Example site rewritten to use composable pattern
 
 `examples/basic-react-site/src/App.tsx` is rewritten to use `FlatwaveLanguageRouter` with
 `FlatwaveMDPageComponent` as the `renderPage`. `componentsDir` is removed from `vite.config.ts`.
-Frontmatter files no longer need `component: 'SimplePage'`. The e2e tests must still pass after this
-change — they check title, locale, sitemap, and robots, all of which remain correct.
+Frontmatter files no longer have `component` field. The e2e tests must still pass after this
+change — they check title, locale, sitemap, and robots, all of which remain valid.
 
 ## Risks / Trade-offs
 
 | Risk                                                                                    | Mitigation                                                                              |
 | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | `react-helmet-async` fix may not cover all edge cases                                   | Test with `renderToString` in unit tests for `DefaultRenderStrategy`                    |
-| Removing `component` from `requiredFields` breaks validation for projects relying on it | Documented as a breaking change; consumers can re-add it to `requiredFields` explicitly |
+| Removing `component` from frontmatter breaks validation for projects relying on it      | Documented as a breaking change                                                         |
 | Example site e2e assertions depend on rendered page title                               | `FlatwaveMDPageComponent` renders `<title>` from frontmatter — assertions remain valid  |
-| Consumer components (SimplePage, ProgramPage) still work via override                   | Backward compat preserved via `componentsDir` when configured                           |

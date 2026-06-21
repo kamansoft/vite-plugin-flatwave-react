@@ -1,34 +1,23 @@
 ## MODIFIED Requirements
 
-### Requirement: DefaultRenderStrategy uses FlatwaveMDPageComponent as primary renderer
+### Requirement: DefaultRenderStrategy uses FlatwaveMDPageComponent as only renderer
 
-The plugin's `DefaultRenderStrategy` SHALL use `FlatwaveMDPageComponent` as the **primary renderer**
+The plugin's `DefaultRenderStrategy` SHALL use `FlatwaveMDPageComponent` as the **only renderer**
 for every SSG route. It SHALL pass `markdownHtml` (pre-compiled body), `frontmatter`, and `locale` from
 `RenderContext` to the component, wrapping it in `HelmetProvider` for correct SSR head tag extraction.
 
-`DefaultRenderStrategy` SHALL fall back to a consumer-supplied component only when ALL of the following
-are true:
+There is no fallback to consumer-supplied components. The `componentsDir` config option and the
+`component` frontmatter field are removed entirely.
 
-1. `componentsDir` is configured in plugin options, AND
-2. The route's `component` frontmatter field names a module that resolves in `componentsDir`
+#### Scenario: SSG generates route using FlatwaveMDPageComponent
 
-When neither condition is met, `FlatwaveMDPageComponent` is used — never the compiled markdown string
-alone.
-
-#### Scenario: SSG generates route using FlatwaveMDPageComponent by default
-
-- **WHEN** no `componentsDir` is configured and frontmatter has no `component` field
+- **WHEN** the SSG pipeline runs for any route
 - **THEN** `DefaultRenderStrategy` renders `<HelmetProvider><FlatwaveMDPageComponent ... /></HelmetProvider>`
   via `renderToString` and produces valid HTML with `<main>`, rendered markdown body, and head tags
 
-#### Scenario: SSG uses consumer component when override is found
-
-- **WHEN** `componentsDir` is configured AND `route.component === 'ProgramPage'` resolves in that directory
-- **THEN** `DefaultRenderStrategy` renders using the `ProgramPage` module instead
-
 #### Scenario: No data-ssg-error appears in generated HTML
 
-- **WHEN** the SSG pipeline runs and no consumer component override is found
+- **WHEN** the SSG pipeline runs
 - **THEN** no `<p data-ssg-error>` element appears in any generated HTML file;
   all pages have the full markdown content rendered
 
@@ -44,3 +33,11 @@ content in `<main>`, sets head tags, and handles all the concerns of a complete 
 the default, not the fallback.
 
 **Migration**: No consumer action required. The change is internal to `DefaultRenderStrategy`.
+
+### Requirement: DefaultRenderStrategy loads consumer components from componentsDir by name
+
+**Reason**: The component-by-name loading via `componentsDir` and `component` frontmatter field is
+removed entirely. `FlatwaveMDPageComponent` is the single source of truth for rendering.
+
+**Migration**: Consumers using custom page components must compose them with `FlatwaveMDPageComponent`
+in their `renderPage` function.

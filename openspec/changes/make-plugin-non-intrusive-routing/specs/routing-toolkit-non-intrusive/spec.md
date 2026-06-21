@@ -13,13 +13,11 @@ and the Flatwave composable React components. No intrusive component-by-name loa
 
 ### Requirement: SSG generates routes through FlatwaveMDPageComponent, not component-name loading
 
-The SSG pipeline (`DefaultRenderStrategy`) SHALL use `FlatwaveMDPageComponent` as its **primary renderer**
+The SSG pipeline (`DefaultRenderStrategy`) SHALL use `FlatwaveMDPageComponent` as its **only renderer**
 for every content route. It SHALL NOT require a `component` frontmatter field or a `componentsDir`
 configuration to produce valid, SEO-compatible HTML output.
 
-When `componentsDir` IS configured AND the route's `component` frontmatter field names a module that
-resolves inside that directory, `DefaultRenderStrategy` MAY use that module as an override. This override
-path is for advanced customisation only and is not the default workflow.
+The `componentsDir` config option and the `component` frontmatter field are **removed entirely**.
 
 #### Scenario: Route HTML generated without componentsDir or component field
 
@@ -34,31 +32,23 @@ path is for advanced customisation only and is not the default workflow.
 - **THEN** the generated HTML contains `<title>About Us</title>`, `<meta name="description" ...>`,
   and `<link rel="canonical" ...>` in the `<head>` section
 
-#### Scenario: Consumer component override still works when componentsDir is set
-
-- **WHEN** `componentsDir` is configured and a frontmatter `component: 'ProgramPage'` resolves to a
-  module in that directory
-- **THEN** `DefaultRenderStrategy` renders using `ProgramPage` instead of `FlatwaveMDPageComponent`
-
 ---
 
-### Requirement: component is not a required frontmatter field by default
+### Requirement: component frontmatter field is removed entirely
 
-The `component` field SHALL be removed from the default `requiredFields` list.
+The `component` field SHALL be removed from `requiredFields` entirely.
 `requiredFields` SHALL default to `['title', 'slug', 'id', 'public']`.
-Consumers who rely on the component-override workflow SHALL add `'component'` to `requiredFields`
-explicitly via plugin config.
+The `component` field is no longer a valid frontmatter field — it is ignored if present in Markdown files.
 
 #### Scenario: Build succeeds without component in frontmatter
 
 - **WHEN** all Markdown files omit the `component` frontmatter field
-- **AND** `componentsDir` is not configured
 - **THEN** `vite build` completes without validation errors or warnings about missing `component`
 
-#### Scenario: Consumer re-adds component to requiredFields
+#### Scenario: component field in frontmatter is ignored
 
-- **WHEN** `requiredFields: ['title', 'slug', 'id', 'public', 'component']` is set in plugin config
-- **THEN** validation fails with an error for any Markdown file that omits the `component` field
+- **WHEN** a Markdown file contains a `component` frontmatter field
+- **THEN** the field is ignored during validation and route generation; no error or warning is emitted
 
 ---
 
@@ -137,3 +127,23 @@ These outputs are automatic — the consumer does not need to configure them to 
 - **WHEN** `markdownHtml` is a non-empty compiled HTML string
 - **THEN** `FlatwaveMDPageComponent` renders the HTML via `dangerouslySetInnerHTML` without attempting
   to load or execute `react-markdown`
+
+---
+
+### Requirement: Strategy pattern for build process extensibility
+
+The plugin SHALL provide a strategy pattern that allows users to define custom logic to create additional files
+(e.g., JSON files) from the recursive markdown content loop during the build process.
+
+#### Scenario: User defines custom strategy to generate JSON from markdown content
+
+- **WHEN** the user provides a strategy function that processes markdown content during build
+- **AND** the strategy is configured in the plugin options
+- **THEN** the strategy function is called for each markdown file during the SSG rendering loop
+- **AND** the user can create additional output files (e.g., JSON) based on the markdown content
+
+#### Scenario: Strategy receives markdown metadata and content
+
+- **WHEN** the strategy function is invoked during build
+- **THEN** it receives the frontmatter, slug, locale, and compiled HTML for each markdown file
+- **AND** the user can access all content data to generate custom output files

@@ -1,33 +1,9 @@
 ## MODIFIED Requirements
 
-### Requirement: FlatwaveLanguageRouter renders routes via a renderPage render prop
+### Requirement: FlatwaveLanguageRouter requires explicit routes prop
 
 `FlatwaveLanguageRouter` SHALL accept a REQUIRED `renderPage: (route: FlatwaveRoute, lang: string) => React.ReactNode`
-prop. It SHALL also accept an optional `routes?: FlatwaveRoute[]` prop.
-
-**When `routes` is provided**, the router uses those routes directly.
-
-**When `routes` is absent**, the consumer MUST supply routes by reading from the virtual module in their
-own code and passing the result. The canonical pattern is:
-
-```tsx
-import { useFlatwaveRoutes } from '@kamansoft/vite-plugin-flatwave-react/react';
-
-function App() {
-  const { locale } = useFlatwaveLanguage();
-  const routes = useFlatwaveRoutes(locale);
-  return (
-    <FlatwaveLanguageRouter
-      supportedLanguages={['es', 'pt']}
-      defaultLanguage="es"
-      routes={routes}
-      renderPage={(route, lang) => (
-        <FlatwaveMDPageComponent frontmatter={route.frontmatter} locale={lang} />
-      )}
-    />
-  );
-}
-```
+prop. It SHALL also accept a REQUIRED `routes: FlatwaveRoute[]` prop.
 
 The router SHALL NOT silently call `getRoutes(lang)` from the virtual module as an implicit internal
 side-effect. The data source must be explicit in consumer code.
@@ -47,6 +23,11 @@ side-effect. The data source must be explicit in consumer code.
 
 - **WHEN** `routes={customApiRoutes}` is passed where routes came from an external API or static config
 - **THEN** the router renders those custom routes without error or conflict with the virtual module
+
+#### Scenario: TypeScript error when routes prop is absent
+
+- **WHEN** a consumer renders `<FlatwaveLanguageRouter renderPage={fn} />` without the `routes` prop
+- **THEN** TypeScript emits a compile-time error (routes is required)
 
 ---
 
