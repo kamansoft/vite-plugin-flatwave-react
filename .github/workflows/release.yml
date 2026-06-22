@@ -96,3 +96,22 @@ jobs:
           # automatically — no long-lived NPM_TOKEN secret required.
           # Trusted publisher configured at:
           # https://www.npmjs.com/package/@kamansoft/vite-plugin-flatwave-react/access
+
+      # ─── 3. Sync workspace version ──────────────────────────────────────────────
+      # semantic-release only bumps the plugin package.json (pkgRoot).
+      # This step syncs the version to the root workspace package.json for consistency.
+      - name: Sync workspace version
+        if: success()
+        run: |
+          PLUGIN_VERSION=$(cat packages/vite-plugin-flatwave-react/package.json | grep '"version"' | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
+          echo "Plugin version: $PLUGIN_VERSION"
+          # Update root package.json
+          npm pkg set version=$PLUGIN_VERSION --workspaces=false
+          # Commit and push the version sync (chore commit won't trigger new release)
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "chore: sync workspace version to $PLUGIN_VERSION" || echo "No changes to commit"
+          git push origin HEAD:main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

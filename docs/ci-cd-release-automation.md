@@ -1,8 +1,8 @@
 # CI/CD & Release Automation
 
-> **Current state (2026-06-19):** Pipeline is fully operational and fully locked.
-> `@kamansoft/vite-plugin-flatwave-react@1.1.0` was the first version published
-> automatically by GitHub Actions using npm OIDC trusted publishing — no tokens
+> **Current state (2026-06-22):** Pipeline is fully operational and fully locked.
+> `@kamansoft/vite-plugin-flatwave-react@2.0.1` is the current published version.
+> Releases are automated by GitHub Actions using npm OIDC trusted publishing — no tokens
 > stored anywhere. `main` cannot receive direct pushes from anyone, including
 > org admins (`enforce_admins: true`, `allow_force_pushes: false`).
 
@@ -140,7 +140,7 @@ npm publish --access public \
   --registry https://registry.npmjs.org \
   --userconfig /tmp/.npmrc-publish
 
-# Output: + @kamansoft/vite-plugin-flatwave-react@0.1.0
+# Output: + @kamansoft/vite-plugin-flatwave-react@1.0.0
 ```
 
 Package URL: https://www.npmjs.com/package/@kamansoft/vite-plugin-flatwave-react
@@ -646,7 +646,7 @@ cd packages/vite-plugin-flatwave-react
 npm publish --access public \
   --registry https://registry.npmjs.org \
   --userconfig /tmp/.npmrc-publish
-# → + @kamansoft/vite-plugin-flatwave-react@0.1.0
+# → + @kamansoft/vite-plugin-flatwave-react@1.0.0 (first manual publish; semantic-release then published 1.1.0, 2.0.0, 2.0.1)
 
 # ── Merge strategy — enforce squash-only with PR title as commit ──────────────
 gh api repos/kamansoft/vite-plugin-flatwave-react \
@@ -755,7 +755,7 @@ git push origin v1.1.0              # push corrected tag
 
 # ── Verify final published version ───────────────────────────────────────────
 npm view @kamansoft/vite-plugin-flatwave-react versions --json
-# → ["0.1.0", "1.1.0"]
+# → ["0.1.0", "1.1.0", "2.0.0", "2.0.1"]
 # published by: GitHub Actions <npm-oidc-no-reply@github.com>
 ```
 
