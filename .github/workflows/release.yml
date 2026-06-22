@@ -100,6 +100,7 @@ jobs:
       # ─── 3. Sync workspace version ──────────────────────────────────────────────
       # semantic-release only bumps the plugin package.json (pkgRoot).
       # This step syncs the version to the root workspace package.json for consistency.
+      # Creates a PR since main is protected.
       - name: Sync workspace version
         if: success()
         run: |
@@ -107,11 +108,14 @@ jobs:
           echo "Plugin version: $PLUGIN_VERSION"
           # Update root package.json
           npm pkg set version=$PLUGIN_VERSION --workspaces=false
-          # Commit and push the version sync (chore commit won't trigger new release)
+          # Create a branch and PR for the version sync (chore commit won't trigger new release)
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          BRANCH_NAME="chore/sync-workspace-version-$PLUGIN_VERSION"
+          git checkout -b "$BRANCH_NAME"
           git add package.json
           git commit -m "chore: sync workspace version to $PLUGIN_VERSION" || echo "No changes to commit"
-          git push origin HEAD:main
+          git push origin "$BRANCH_NAME"
+          gh pr create --base main --head "$BRANCH_NAME" --title "chore: sync workspace version to $PLUGIN_VERSION" --body "Automated version sync after release v$PLUGIN_VERSION" --label "automated" || echo "PR may already exist"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
