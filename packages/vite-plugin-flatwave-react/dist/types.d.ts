@@ -23,6 +23,16 @@ export interface RenderHooks {
     transformHtml?: (html: string, context: unknown) => Promise<string> | string;
     afterRender?: (html: string, context: unknown) => Promise<void> | void;
     onError?: (error: Error, context: unknown) => Promise<string> | string;
+    emitFiles?: (context: EmitFilesContext) => Promise<SsgOutputFile[]> | SsgOutputFile[];
+}
+export interface SsgOutputFile {
+    fileName: string;
+    source: string;
+}
+export interface EmitFilesContext {
+    routes: FlatwaveRoute[];
+    contentIndex: FlatwaveContentIndex;
+    renderedFiles: SsgOutputFile[];
 }
 export interface TemplateOverrides {
     indexHtml?: string;
@@ -44,7 +54,6 @@ export interface FlatwaveContentOptions {
     strictMissingLocales?: boolean;
     requiredFields?: string[];
     validateComponents?: boolean;
-    componentsDir?: string | string[];
     emitRouteManifest?: boolean;
     emitSitemap?: boolean;
     emitRobotsTxt?: boolean;
@@ -56,7 +65,6 @@ export interface FlatwaveFrontmatter extends Record<string, unknown> {
     title: string;
     slug: string;
     id: string;
-    component: string;
     public?: boolean | string;
     description?: string;
     canonical?: string;
@@ -75,7 +83,6 @@ export interface FlatwaveContentEntry {
     slug: string;
     path: string;
     file: string;
-    component?: string;
     public: boolean;
     attributes: FlatwaveFrontmatter;
     frontmatter: FlatwaveFrontmatter;
@@ -87,7 +94,6 @@ export interface FlatwaveRoute {
     locale: string;
     path: string;
     contentId: string;
-    component?: string;
     metadata: SeoMetadata;
     frontmatter: FlatwaveFrontmatter;
     alternatives: Record<string, string>;

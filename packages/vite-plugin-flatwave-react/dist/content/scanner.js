@@ -53,7 +53,6 @@ export function buildContentEntry(parsed, alternatives) {
         slug: parsed.slug,
         path: route,
         file: parsed.file,
-        component: parsed.frontmatter.component ? String(parsed.frontmatter.component) : undefined,
         public: isPublicEntry(parsed.frontmatter),
         attributes,
         frontmatter: parsed.frontmatter,

@@ -2,7 +2,6 @@
 title: 'Acerca de'
 slug: 'about'
 id: 'about'
-component: 'SimplePage'
 public: true
 description: 'Página acerca del ejemplo Flatwave.'
 canonical: '/es/about'

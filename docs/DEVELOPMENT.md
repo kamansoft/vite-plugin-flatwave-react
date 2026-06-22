@@ -646,7 +646,7 @@ cd /path/to/your-project && npm install
 ```json
 {
   "dependencies": {
-    "@kamansoft/vite-plugin-flatwave-react": "^1.0.0"
+    "@kamansoft/vite-plugin-flatwave-react": "^2.0.1"
   }
 }
 ```

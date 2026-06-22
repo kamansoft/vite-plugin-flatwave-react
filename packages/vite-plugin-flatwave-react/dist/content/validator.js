@@ -1,17 +1,14 @@
-import { readdir } from 'node:fs/promises';
-import path from 'node:path';
 import { routeForLocaleSlug, scanMarkdownFiles } from './scanner.js';
 import { buildContentIndex } from './routeBuilder.js';
 export async function validateContent(options) {
     const errors = [];
     const warnings = [];
-    const requiredFields = options.requiredFields ?? ['title', 'slug', 'id', 'component', 'public'];
+    const requiredFields = options.requiredFields ?? ['title', 'slug', 'id', 'public'];
     const files = await scanMarkdownFiles(options.contentDir, options.locales);
     await validateRequiredFields(files, requiredFields, errors);
     await validateDuplicateIds(files, errors);
     await validateDuplicateSlugs(files, errors);
     await validateMenuPositions(files, errors);
-    await validateComponents(files, options, errors);
     validateMissingLocales(files, options, warnings);
     const entries = files.map((file) => {
         const id = String(file.frontmatter.id || file.slug);
@@ -22,7 +19,6 @@ export async function validateContent(options) {
             slug: file.slug,
             path: route,
             file: file.file,
-            component: file.frontmatter.component ? String(file.frontmatter.component) : undefined,
             public: file.frontmatter.public !== false &&
                 String(file.frontmatter.public ?? 'true').toLowerCase() !== 'false',
             attributes: file.frontmatter,
@@ -101,45 +97,6 @@ async function validateMenuPositions(files, errors) {
         }
     }
 }
-async function validateComponents(files, options, errors) {
-    if (options.validateComponents === false)
-        return;
-    const available = await discoverComponents(options.componentsDir);
-    for (const file of files) {
-        const component = file.frontmatter.component ? String(file.frontmatter.component) : undefined;
-        if (!component)
-            continue;
-        if (!available.has(component)) {
-            errors.push(`[${file.locale}] ${file.file}: Component '${component}' does not exist in ${formatComponentsDir(options.componentsDir)}.`);
-        }
-    }
-}
-async function discoverComponents(componentsDir) {
-    const dirs = Array.isArray(componentsDir)
-        ? componentsDir
-        : componentsDir
-            ? [componentsDir]
-            : ['src/components', 'src/pages'];
-    const components = new Set();
-    for (const dir of dirs) {
-        const absolute = path.resolve(dir);
-        let files;
-        try {
-            files = (await readdir(absolute, { withFileTypes: true }));
-        }
-        catch {
-            continue;
-        }
-        for (const file of files) {
-            if (!file.isFile())
-                continue;
-            if (!/\.(tsx?|jsx?)$/.test(file.name))
-                continue;
-            components.add(file.name.replace(/\.[^.]+$/, ''));
-        }
-    }
-    return components;
-}
 function validateMissingLocales(files, options, warnings) {
     const idsByLocale = new Map();
     for (const file of files) {
@@ -160,9 +117,4 @@ function validateMissingLocales(files, options, warnings) {
             }
         }
     }
-}
-function formatComponentsDir(componentsDir) {
-    if (!componentsDir)
-        return 'src/components or src/pages';
-    return Array.isArray(componentsDir) ? componentsDir.join(', ') : componentsDir;
 }

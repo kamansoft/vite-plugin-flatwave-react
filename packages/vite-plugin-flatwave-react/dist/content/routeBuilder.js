@@ -22,7 +22,6 @@ export function buildContentIndex(entries) {
                 locale: entry.locale,
                 path: entry.route,
                 contentId: entry.id,
-                component: entry.component,
                 metadata: buildSeoMetadata(entry.frontmatter, entry.route, entry.locale),
                 frontmatter: entry.frontmatter,
                 alternatives,

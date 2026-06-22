@@ -2,7 +2,6 @@
 title: 'Programa'
 slug: 'program'
 id: 'program'
-component: 'ProgramPage'
 public: true
 description: 'Página de programa com frontmatter específico do componente.'
 canonical: '/pt/program'

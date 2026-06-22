@@ -106,8 +106,6 @@ describe('Flatwave example e2e', () => {
         'es,pt',
         '--default-locale',
         'es',
-        '--components-dir',
-        'examples/basic-react-site/src/components',
       ],
       { cwd: root, encoding: 'utf-8' }
     );

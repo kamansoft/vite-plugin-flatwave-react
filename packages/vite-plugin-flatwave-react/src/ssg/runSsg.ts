@@ -13,11 +13,7 @@ import {
   compileMarkdownToHtml,
   type MarkdownCompilerOptions,
 } from '../content/markdownCompiler.js';
-
-export interface SsgOutputFile {
-  fileName: string;
-  source: string;
-}
+import type { SsgOutputFile } from '../types.js';
 
 export function renderSitemap(routes: FlatwaveRoute[], hostname: string): string {
   const base = hostname.replace(/\/$/, '');
@@ -40,27 +36,6 @@ Allow: /
 
 Sitemap: ${base}/sitemap.xml
 `;
-}
-
-async function buildComponentsMap(routes: FlatwaveRoute[]): Promise<Map<string, unknown>> {
-  const components = new Map<string, unknown>();
-  const uniqueComponents = new Set(routes.map((r) => r.component).filter(Boolean));
-
-  for (const componentName of uniqueComponents) {
-    try {
-      const module = await import(`../react/${componentName}.js`);
-      components.set(componentName!, module);
-    } catch {
-      try {
-        const module = await import(`virtual:flatwave/components/${componentName}`);
-        components.set(componentName!, module);
-      } catch {
-        console.warn(`[SSG] Could not load component: ${componentName}`);
-      }
-    }
-  }
-
-  return components;
 }
 
 function toCompilerOptions(
@@ -87,7 +62,7 @@ export async function runSsg(
   const strategy = ssgOptions.strategy ?? new DefaultRenderStrategy();
   const pipeline = new RenderPipeline(ssgOptions.hooks);
 
-  const components = await buildComponentsMap(routes);
+  const components = new Map<string, unknown>();
 
   const concurrencyLimit = 4;
   const routeChunks: FlatwaveRoute[][] = [];
@@ -204,6 +179,15 @@ export async function runSsg(
       source: renderRobotsTxt(options.sitemap?.hostname ?? 'http://localhost:4173'),
     });
   }
+
+  // Call emitFiles hook after all routes are rendered
+  const emitFilesContext = {
+    routes,
+    contentIndex: index,
+    renderedFiles: outputFiles,
+  };
+  const emittedFiles = await pipeline.executeEmitFiles(emitFilesContext);
+  outputFiles.push(...emittedFiles);
 
   return outputFiles;
 }
