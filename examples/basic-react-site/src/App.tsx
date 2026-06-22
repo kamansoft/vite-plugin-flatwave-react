@@ -5,6 +5,7 @@ import {
   useFlatwaveContent,
 } from '@kamansoft/vite-plugin-flatwave-react/react';
 import type { FlatwaveFrontmatter } from '@kamansoft/vite-plugin-flatwave-react/types';
+import type { FlatwaveVirtualRoute } from 'virtual:flatwave/content';
 
 export function App() {
   const routes = useFlatwaveRoutes();
@@ -14,7 +15,7 @@ export function App() {
       supportedLanguages={['es', 'pt']}
       defaultLanguage="es"
       routes={routes}
-      renderPage={(route, lang) => {
+      renderPage={(route: FlatwaveVirtualRoute, lang: string) => {
         const content = useFlatwaveContent(route.contentId, lang);
         return (
           <FlatwaveMDPageComponent
